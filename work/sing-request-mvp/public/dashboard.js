@@ -202,6 +202,11 @@ function requestSort(a, b) {
 
 function renderRequests() {
   const requests = [...state.dashboard.requests].sort(requestSort);
+  const requestCounts = requests.reduce((counts, request) => {
+    const key = request.songId || request.song?.title || request.id;
+    counts.set(key, (counts.get(key) || 0) + 1);
+    return counts;
+  }, new Map());
   renderStats(requests);
 
   if (!requests.length) {
@@ -209,14 +214,22 @@ function renderRequests() {
     return;
   }
 
-  els.requestList.innerHTML = requests.map(request => `
-    <article class="request-card" data-status="${request.status}">
+  els.requestList.innerHTML = requests.map(request => {
+    const repeatKey = request.songId || request.song?.title || request.id;
+    const repeatCount = requestCounts.get(repeatKey) || 1;
+    const isRepeat = repeatCount > 1;
+
+    return `
+    <article class="request-card ${isRepeat ? "repeat-request" : ""}" data-status="${request.status}">
       <div class="section-title">
         <div>
           <h3>${escapeHtml(request.song?.title || "Unknown song")}</h3>
           <p>${escapeHtml(request.song?.artist || "")}</p>
         </div>
-        <span class="status-pill" data-status="${request.status}">${statusLabels[request.status]}</span>
+        <div class="request-badges">
+          ${isRepeat ? `<span class="repeat-pill">${repeatCount} requests</span>` : ""}
+          <span class="status-pill" data-status="${request.status}">${statusLabels[request.status]}</span>
+        </div>
       </div>
       <p>
         ${request.guestName ? `<strong>${escapeHtml(request.guestName)}</strong>` : "Anonymous"}
@@ -231,7 +244,8 @@ function renderRequests() {
         `).join("")}
       </div>
     </article>
-  `).join("");
+  `;
+  }).join("");
 }
 
 function tagsFor(song) {
