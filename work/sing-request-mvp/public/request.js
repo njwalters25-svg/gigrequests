@@ -65,8 +65,10 @@ async function api(path, options) {
 function songMatches(song) {
   const query = els.searchInput.value.trim().toLowerCase();
   const tags = tagsFor(song);
+  const lowerTags = tags.map(tag => tag.toLowerCase());
+  const selectedFilter = state.selectedFilter.toLowerCase();
   const filterMatch = state.selectedFilter === "All" ||
-    (state.selectedFilter === favouriteFilter ? song.featured : tags.includes(state.selectedFilter));
+    (selectedFilter === favouriteFilter.toLowerCase() ? song.featured : lowerTags.includes(selectedFilter));
   const textMatch = !query || `${song.title} ${song.artist} ${tags.join(" ")}`.toLowerCase().includes(query);
   return filterMatch && textMatch;
 }
@@ -108,15 +110,10 @@ function renderGenres() {
     return;
   }
 
-  const availableTags = new Set(state.songs.flatMap(tagsFor));
   const configuredFilters = Array.isArray(state.settings.audienceFilters)
     ? state.settings.audienceFilters
     : [];
-  const filters = ["All", ...configuredFilters.filter(filter =>
-    filter === favouriteFilter
-      ? state.songs.some(song => song.featured)
-      : availableTags.has(filter)
-  )].slice(0, 8);
+  const filters = ["All", ...configuredFilters].slice(0, 8);
 
   if (!filters.includes(state.selectedFilter)) state.selectedFilter = "All";
 
