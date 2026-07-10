@@ -4,6 +4,8 @@ const state = {
   catalogQuery: "",
   editingSongId: null,
   archiveGig: null,
+  publicSettingsDirty: false,
+  filterSettingsDirty: false,
   selectedSongIds: new Set()
 };
 
@@ -366,18 +368,24 @@ function renderDashboard() {
   const { singer, activeGig } = state.dashboard;
   els.dashboardSinger.textContent = singer.stageName;
   const settings = state.dashboard.settings || {};
-  els.publicStageName.value = singer.stageName || "";
-  els.publicTagline.value = singer.tagline || "";
-  els.publicHeroTitle.value = settings.heroTitle || "";
-  els.publicHeroText.value = settings.heroText || "";
-  els.publicProfileImageUrl.value = settings.profileImageUrl || "";
-  els.publicBackgroundImageUrl.value = settings.backgroundImageUrl || "";
-  renderImagePreview(els.publicProfileImagePreview, settings.profileImageUrl, "No photo");
-  renderImagePreview(els.publicBackgroundImagePreview, settings.backgroundImageUrl, "Default background");
-  els.audienceFiltersEnabled.checked = settings.audienceFiltersEnabled !== false;
-  els.audienceFilters.value = Array.isArray(settings.audienceFilters)
-    ? settings.audienceFilters.join(", ")
-    : "";
+
+  if (!state.publicSettingsDirty) {
+    els.publicStageName.value = singer.stageName || "";
+    els.publicTagline.value = singer.tagline || "";
+    els.publicHeroTitle.value = settings.heroTitle || "";
+    els.publicHeroText.value = settings.heroText || "";
+    els.publicProfileImageUrl.value = settings.profileImageUrl || "";
+    els.publicBackgroundImageUrl.value = settings.backgroundImageUrl || "";
+    renderImagePreview(els.publicProfileImagePreview, settings.profileImageUrl, "No photo");
+    renderImagePreview(els.publicBackgroundImagePreview, settings.backgroundImageUrl, "Default background");
+  }
+
+  if (!state.filterSettingsDirty) {
+    els.audienceFiltersEnabled.checked = settings.audienceFiltersEnabled !== false;
+    els.audienceFilters.value = Array.isArray(settings.audienceFilters)
+      ? settings.audienceFilters.join(", ")
+      : "";
+  }
 
   if (activeGig) {
     els.activeGigName.textContent = activeGig.name;
@@ -576,6 +584,7 @@ els.catalogSearch.addEventListener("input", () => {
 });
 
 els.publicProfileImageFile.addEventListener("change", async () => {
+  state.publicSettingsDirty = true;
   try {
     const value = await resizeImageFile(els.publicProfileImageFile.files[0], 640);
     els.publicProfileImageUrl.value = value;
@@ -587,6 +596,7 @@ els.publicProfileImageFile.addEventListener("change", async () => {
 });
 
 els.publicBackgroundImageFile.addEventListener("change", async () => {
+  state.publicSettingsDirty = true;
   try {
     const value = await resizeImageFile(els.publicBackgroundImageFile.files[0], 1600);
     els.publicBackgroundImageUrl.value = value;
@@ -602,16 +612,26 @@ els.publicSettingsForm.addEventListener("click", event => {
   if (!button) return;
 
   if (button.dataset.clearPublicImage === "profile") {
+    state.publicSettingsDirty = true;
     els.publicProfileImageFile.value = "";
     els.publicProfileImageUrl.value = "";
     renderImagePreview(els.publicProfileImagePreview, "", "No photo");
   }
 
   if (button.dataset.clearPublicImage === "background") {
+    state.publicSettingsDirty = true;
     els.publicBackgroundImageFile.value = "";
     els.publicBackgroundImageUrl.value = "";
     renderImagePreview(els.publicBackgroundImagePreview, "", "Default background");
   }
+});
+
+els.publicSettingsForm.addEventListener("input", () => {
+  state.publicSettingsDirty = true;
+});
+
+els.publicSettingsForm.addEventListener("change", () => {
+  state.publicSettingsDirty = true;
 });
 
 els.publicSettingsForm.addEventListener("submit", async event => {
@@ -628,6 +648,7 @@ els.publicSettingsForm.addEventListener("submit", async event => {
         backgroundImageUrl: els.publicBackgroundImageUrl.value
       })
     });
+    state.publicSettingsDirty = false;
     showToast("Public page saved.");
     await loadDashboard();
   } catch (error) {
@@ -651,6 +672,14 @@ els.deleteSong.addEventListener("click", async () => {
   }
 });
 
+els.filterSettingsForm.addEventListener("input", () => {
+  state.filterSettingsDirty = true;
+});
+
+els.filterSettingsForm.addEventListener("change", () => {
+  state.filterSettingsDirty = true;
+});
+
 els.filterSettingsForm.addEventListener("submit", async event => {
   event.preventDefault();
   try {
@@ -661,6 +690,7 @@ els.filterSettingsForm.addEventListener("submit", async event => {
         audienceFilters: els.audienceFilters.value.split(/[|;,]/).map(filter => filter.trim()).filter(Boolean)
       })
     });
+    state.filterSettingsDirty = false;
     showToast("Audience filters saved.");
     await loadDashboard();
   } catch (error) {
