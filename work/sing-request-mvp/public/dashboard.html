@@ -85,60 +85,65 @@
           </section>
 
           <section class="panel dashboard-section">
-            <div class="section-title">
-              <div>
-                <p class="eyebrow">Song catalog</p>
-                <h2>Add and manage</h2>
+            <details class="settings-disclosure catalog-disclosure">
+              <summary>
+                <span>
+                  <span class="eyebrow">Song catalog</span>
+                  <strong>Add and manage songs</strong>
+                </span>
+                <span class="summary-action">Manage</span>
+              </summary>
+              <div class="catalog-panel">
+                <button class="ghost import-button" type="button" id="openImportDialog">Bulk import</button>
+                <form class="song-add-form" id="songForm">
+                  <input id="songTitle" maxlength="120" placeholder="Song title" required>
+                  <input id="songArtist" maxlength="120" placeholder="Artist" required>
+                  <input id="songTags" maxlength="160" placeholder="Tags: Pop, 60s, Soul">
+                  <button class="primary" type="submit">Add song</button>
+                </form>
+                <form class="filter-settings" id="filterSettingsForm">
+                  <div>
+                    <p class="eyebrow">Audience page</p>
+                    <h3>Quick buttons</h3>
+                    <p class="muted">Optional buttons shown above the public song list, such as Favourites, 80s, or Wedding.</p>
+                  </div>
+                  <label class="check-row">
+                    <input id="audienceFiltersEnabled" type="checkbox">
+                    Show quick buttons
+                  </label>
+                  <label>
+                    Button labels
+                    <input id="audienceFilters" maxlength="180" placeholder="Favourites, 80s, Wedding">
+                  </label>
+                  <button class="mini-button" type="submit">Save quick buttons</button>
+                </form>
+                <div class="catalog-toolbar">
+                  <input class="search" id="catalogSearch" type="search" placeholder="Search your song list">
+                  <div class="segmented" aria-label="Catalog sort">
+                    <button class="active" type="button" data-sort="title">Song A-Z</button>
+                    <button type="button" data-sort="artist">Artist A-Z</button>
+                  </div>
+                </div>
+                <div class="bulk-toolbar">
+                  <div class="bulk-row">
+                    <label class="select-visible">
+                      <input id="selectVisibleSongs" type="checkbox">
+                      Visible
+                    </label>
+                    <span class="muted" id="selectionCount">0 selected</span>
+                  </div>
+                  <div class="bulk-actions" aria-label="Selected song actions">
+                    <button class="mini-button" type="button" data-bulk-action="favourite">Favourite</button>
+                    <button class="mini-button" type="button" data-bulk-action="unfavourite">Unfavourite</button>
+                    <button class="mini-button" type="button" data-bulk-action="available">Available</button>
+                    <button class="mini-button" type="button" data-bulk-action="unavailable">Unavailable</button>
+                    <button class="mini-button danger-button" type="button" data-bulk-action="delete">Delete</button>
+                  </div>
+                  <button class="mini-button set-button" type="button" id="makeVisibleOnly">Use search as available set</button>
+                </div>
+                <div class="song-admin-grid" id="songAdmin"></div>
               </div>
-              <button class="ghost" type="button" id="openImportDialog">Bulk import</button>
-            </div>
-            <form class="song-add-form" id="songForm">
-              <input id="songTitle" maxlength="120" placeholder="Song title" required>
-              <input id="songArtist" maxlength="120" placeholder="Artist" required>
-              <input id="songTags" maxlength="160" placeholder="Tags: Pop, 60s, Soul">
-              <button class="primary" type="submit">Add song</button>
-            </form>
-            <form class="filter-settings" id="filterSettingsForm">
-              <div>
-                <p class="eyebrow">Audience page</p>
-                <h3>Quick buttons</h3>
-                <p class="muted">Optional buttons shown above the public song list, such as Favourites, 80s, or Wedding.</p>
-              </div>
-              <label class="check-row">
-                <input id="audienceFiltersEnabled" type="checkbox">
-                Show quick buttons
-              </label>
-              <label>
-                Button labels
-                <input id="audienceFilters" maxlength="180" placeholder="Favourites, 80s, Wedding">
-              </label>
-              <button class="mini-button" type="submit">Save quick buttons</button>
-            </form>
-            <div class="catalog-toolbar">
-              <input class="search" id="catalogSearch" type="search" placeholder="Search your song list">
-              <div class="segmented" aria-label="Catalog sort">
-                <button class="active" type="button" data-sort="title">Song A-Z</button>
-                <button type="button" data-sort="artist">Artist A-Z</button>
-              </div>
-            </div>
-            <div class="bulk-toolbar">
-              <div class="bulk-row">
-                <label class="select-visible">
-                  <input id="selectVisibleSongs" type="checkbox">
-                  Visible
-                </label>
-                <span class="muted" id="selectionCount">0 selected</span>
-              </div>
-              <div class="bulk-actions" aria-label="Selected song actions">
-                <button class="mini-button" type="button" data-bulk-action="favourite">Favourite</button>
-                <button class="mini-button" type="button" data-bulk-action="unfavourite">Unfavourite</button>
-                <button class="mini-button" type="button" data-bulk-action="available">Available</button>
-                <button class="mini-button" type="button" data-bulk-action="unavailable">Unavailable</button>
-                <button class="mini-button danger-button" type="button" data-bulk-action="delete">Delete</button>
-              </div>
-              <button class="mini-button set-button" type="button" id="makeVisibleOnly">Use search as available set</button>
-            </div>
-            <div class="song-admin-grid" id="songAdmin"></div>
+            </details>
           </section>
 
           <section class="panel dashboard-section" style="margin-top: 14px;">

@@ -590,6 +590,16 @@ textarea {
   background: var(--teal);
 }
 
+.catalog-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.import-button {
+  justify-self: start;
+}
+
 .catalog-toolbar,
 .song-add-form,
 .public-settings,
