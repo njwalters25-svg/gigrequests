@@ -202,11 +202,6 @@ function requestSort(a, b) {
 
 function renderRequests() {
   const requests = [...state.dashboard.requests].sort(requestSort);
-  const requestCounts = requests.reduce((counts, request) => {
-    const key = request.songId || request.song?.title || request.id;
-    counts.set(key, (counts.get(key) || 0) + 1);
-    return counts;
-  }, new Map());
   renderStats(requests);
 
   if (!requests.length) {
@@ -214,33 +209,51 @@ function renderRequests() {
     return;
   }
 
-  els.requestList.innerHTML = requests.map(request => {
-    const repeatKey = request.songId || request.song?.title || request.id;
-    const repeatCount = requestCounts.get(repeatKey) || 1;
-    const isRepeat = repeatCount > 1;
+  const groups = requests.reduce((items, request) => {
+    const key = request.songId || `${request.song?.title || "Unknown song"}-${request.song?.artist || ""}`;
+    const group = items.get(key) || {
+      key,
+      song: request.song,
+      requests: []
+    };
+    group.requests.push(request);
+    items.set(key, group);
+    return items;
+  }, new Map());
+
+  els.requestList.innerHTML = [...groups.values()].map(group => {
+    const groupRequests = group.requests.sort(requestSort);
+    const topStatus = groupRequests[0]?.status || "new";
+    const isRepeat = groupRequests.length > 1;
 
     return `
-    <article class="request-card ${isRepeat ? "repeat-request" : ""}" data-status="${request.status}">
+    <article class="request-card ${isRepeat ? "repeat-request" : ""}" data-status="${topStatus}">
       <div class="section-title">
         <div>
-          <h3>${escapeHtml(request.song?.title || "Unknown song")}</h3>
-          <p>${escapeHtml(request.song?.artist || "")}</p>
+          <h3>${escapeHtml(group.song?.title || "Unknown song")}</h3>
+          <p>${escapeHtml(group.song?.artist || "")}</p>
         </div>
         <div class="request-badges">
-          ${isRepeat ? `<span class="repeat-pill">${repeatCount} requests</span>` : ""}
-          <span class="status-pill" data-status="${request.status}">${statusLabels[request.status]}</span>
+          ${isRepeat ? `<span class="repeat-pill">${groupRequests.length} requests</span>` : ""}
+          <span class="status-pill" data-status="${topStatus}">${statusLabels[topStatus]}</span>
         </div>
       </div>
-      <p>
-        ${request.guestName ? `<strong>${escapeHtml(request.guestName)}</strong>` : "Anonymous"}
-        ${request.message ? ` - ${escapeHtml(request.message)}` : ""}
-      </p>
-      <p class="muted">Requested at ${timeLabel(request.createdAt)}</p>
-      <div class="status-row">
-        ${statuses.map(status => `
-          <button class="status-button ${status === request.status ? "active" : ""}" type="button" data-request-id="${request.id}" data-status="${status}">
-            ${statusLabels[status]}
-          </button>
+      <div class="grouped-requests">
+        ${groupRequests.map(request => `
+          <div class="grouped-request">
+            <div class="request-detail-lines">
+              <p><strong>${request.guestName ? escapeHtml(request.guestName) : "Anonymous"}</strong></p>
+              ${request.message ? `<p>${escapeHtml(request.message)}</p>` : ""}
+              <p class="muted">Requested at ${timeLabel(request.createdAt)}</p>
+            </div>
+            <div class="status-row">
+              ${statuses.map(status => `
+                <button class="status-button ${status === request.status ? "active" : ""}" type="button" data-request-id="${request.id}" data-status="${status}">
+                  ${statusLabels[status]}
+                </button>
+              `).join("")}
+            </div>
+          </div>
         `).join("")}
       </div>
     </article>
