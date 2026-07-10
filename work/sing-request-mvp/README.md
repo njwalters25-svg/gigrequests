@@ -8,7 +8,7 @@ A local MVP for a singer's live song-request app.
 - Singer public URL at `/chellesjukebox`
 - Lightweight health check at `/healthz`
 - Singer dashboard at `/dashboard`
-- Local JSON database in `data/db.json`
+- Local JSON database in `data/db.json`, with optional Supabase persistence for hosting
 - Active gig model: starting a new gig archives the previous active gig
 - Open archived gigs and review their saved requests
 - Start a new gig from an archived gig, with editable name, venue, date/time, and notes before creating it
@@ -38,7 +38,16 @@ Then open:
 
 ## Notes
 
-This version intentionally has no login and uses a JSON file as the database. That makes it easy to try locally. The same app shape can later move to Supabase/Postgres with authentication and a permanent hosted URL for the QR code.
+This version intentionally has no login. Locally it uses `data/db.json`; when hosted with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set, it stores the same app state in Supabase.
+
+## Supabase setup
+
+Run `supabase/schema.sql` in the Supabase SQL editor once. Then set these Render environment variables:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+On the first hosted load, the app will seed Supabase from `data/db.json` if the app state row does not exist yet.
 
 Bulk import format:
 

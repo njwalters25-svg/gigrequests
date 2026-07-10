@@ -7,6 +7,9 @@ const PORT = Number(process.env.PORT || 3000);
 const ROOT = __dirname;
 const PUBLIC_DIR = path.join(ROOT, "public");
 const DB_PATH = path.join(ROOT, "data", "db.json");
+const SUPABASE_URL = String(process.env.SUPABASE_URL || "").replace(/\/$/, "");
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || "";
+const APP_STATE_ID = process.env.APP_STATE_ID || "default";
 let writeQueue = Promise.resolve();
 
 const contentTypes = {
@@ -28,12 +31,75 @@ const reservedRoutes = new Set([
   "support"
 ]);
 
-async function readDb() {
+function useSupabase() {
+  return Boolean(SUPABASE_URL && SUPABASE_KEY);
+}
+
+async function readLocalDb() {
   return JSON.parse(await fs.readFile(DB_PATH, "utf8"));
 }
 
-async function writeDb(db) {
+async function writeLocalDb(db) {
   await fs.writeFile(DB_PATH, JSON.stringify(db, null, 2) + "\n");
+}
+
+async function supabaseRequest(pathname, options = {}) {
+  if (typeof fetch !== "function") {
+    throw new Error("This Node.js version does not support fetch. Use Node 18 or newer.");
+  }
+
+  const response = await fetch(`${SUPABASE_URL}${pathname}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+
+  if (!response.ok) {
+    const message = data && (data.message || data.error)
+      ? data.message || data.error
+      : `Supabase request failed with ${response.status}`;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+async function writeSupabaseDb(db) {
+  await supabaseRequest(`/rest/v1/app_state?on_conflict=id`, {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates" },
+    body: JSON.stringify({
+      id: APP_STATE_ID,
+      data: db,
+      updated_at: new Date().toISOString()
+    })
+  });
+}
+
+async function readDb() {
+  if (!useSupabase()) return readLocalDb();
+
+  const rows = await supabaseRequest(`/rest/v1/app_state?id=eq.${encodeURIComponent(APP_STATE_ID)}&select=data&limit=1`);
+  if (Array.isArray(rows) && rows[0] && rows[0].data) return rows[0].data;
+
+  const initialDb = await readLocalDb();
+  await writeSupabaseDb(initialDb);
+  return initialDb;
+}
+
+async function writeDb(db) {
+  if (useSupabase()) {
+    await writeSupabaseDb(db);
+    return;
+  }
+
+  await writeLocalDb(db);
 }
 
 function mutateDb(callback) {
