@@ -57,6 +57,8 @@ Valerie,Amy Winehouse,Soul; Pop; 2000s
 Can't Help Falling in Love,Elvis Presley,Classic; 60s; Wedding
 ```
 
+You can also paste spreadsheet rows with extra columns after artist, such as `Title, Artist, Decade, Genre, Occasion`. Every column after artist is saved as a searchable tag.
+
 The app stores genre, decade, and vibe as flexible tags. It does not automatically know a song's genre yet; that could be added later with a music metadata provider or an AI-assisted tagging step.
 
 Audience quick filters are optional. The singer can choose labels such as `Favourites`, `80s`, or `Wedding`, or turn the filter row off entirely. Tags still work in search even when they are not shown as buttons.

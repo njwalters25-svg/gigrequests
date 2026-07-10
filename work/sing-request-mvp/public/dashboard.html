@@ -218,11 +218,11 @@
         <div>
           <p class="eyebrow">Bulk import</p>
           <h2>Paste songs</h2>
-          <p class="muted">Use CSV rows: title, artist, tags. Tags can be separated with semicolons or pipes.</p>
+          <p class="muted">Use rows: title, artist, tags. Every column after artist is saved as searchable tags.</p>
         </div>
         <label>
           Song rows
-          <textarea id="importText" class="import-box" placeholder="Valerie, Amy Winehouse, Soul; Pop; 2000s&#10;Can't Help Falling in Love, Elvis Presley, Classic; 60s; Wedding"></textarea>
+          <textarea id="importText" class="import-box" placeholder="Valerie, Amy Winehouse, Soul, Pop, 2000s&#10;Can't Help Falling in Love, Elvis Presley, Classic, 60s, Wedding"></textarea>
         </label>
         <div class="request-actions">
           <button class="primary" type="submit">Import songs</button>

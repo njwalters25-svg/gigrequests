@@ -269,6 +269,21 @@ function parseCsvLine(line) {
   return cells;
 }
 
+function parseImportLine(line) {
+  if (line.includes("\t")) {
+    return line.split("\t").map(cell => cell.trim());
+  }
+
+  return parseCsvLine(line);
+}
+
+function tagCellsToTags(cells) {
+  return cells
+    .flatMap(cell => String(cell || "").split(/[|;,]/))
+    .map(tag => tag.trim())
+    .filter(Boolean);
+}
+
 async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/public") {
     const db = await readDb();
@@ -434,7 +449,7 @@ async function handleApi(req, res, url) {
       const skipped = [];
 
       lines.forEach((line, index) => {
-        const [title, artist, tagText = ""] = parseCsvLine(line);
+        const [title, artist, ...tagCells] = parseImportLine(line);
         const lowerTitle = String(title || "").toLowerCase();
         const lowerArtist = String(artist || "").toLowerCase();
 
@@ -443,7 +458,7 @@ async function handleApi(req, res, url) {
         const result = createSong({
           title,
           artist,
-          tags: tagText.split(/[|;]/).map(tag => tag.trim())
+          tags: tagCellsToTags(tagCells)
         });
 
         if (result.error) {
