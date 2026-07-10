@@ -98,24 +98,29 @@
               <input id="songTags" maxlength="160" placeholder="Tags: Pop, 60s, Soul">
               <button class="primary" type="submit">Add song</button>
             </form>
+            <form class="filter-settings" id="filterSettingsForm">
+              <div>
+                <p class="eyebrow">Audience page</p>
+                <h3>Quick buttons</h3>
+                <p class="muted">Optional buttons shown above the public song list, such as Favourites, 80s, or Wedding.</p>
+              </div>
+              <label class="check-row">
+                <input id="audienceFiltersEnabled" type="checkbox">
+                Show quick buttons
+              </label>
+              <label>
+                Button labels
+                <input id="audienceFilters" maxlength="180" placeholder="Favourites, 80s, Wedding">
+              </label>
+              <button class="mini-button" type="submit">Save quick buttons</button>
+            </form>
             <div class="catalog-toolbar">
-              <input class="search" id="catalogSearch" type="search" placeholder="Search catalog">
+              <input class="search" id="catalogSearch" type="search" placeholder="Search your song list">
               <div class="segmented" aria-label="Catalog sort">
                 <button class="active" type="button" data-sort="title">Song A-Z</button>
                 <button type="button" data-sort="artist">Artist A-Z</button>
               </div>
             </div>
-            <form class="filter-settings" id="filterSettingsForm">
-              <label class="check-row">
-                <input id="audienceFiltersEnabled" type="checkbox">
-                Show quick filters on audience page
-              </label>
-              <label>
-                Quick filters
-                <input id="audienceFilters" maxlength="180" placeholder="Favourites, 80s, Wedding">
-              </label>
-              <button class="mini-button" type="submit">Save filters</button>
-            </form>
             <div class="bulk-toolbar">
               <div class="bulk-row">
                 <label class="select-visible">

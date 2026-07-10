@@ -625,6 +625,16 @@ textarea {
   background: #f9fafb;
 }
 
+.filter-settings h3 {
+  margin: 0 0 3px;
+  font-size: 1rem;
+}
+
+.filter-settings .muted {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
 .public-settings {
   margin-top: 12px;
   margin-bottom: 0;
