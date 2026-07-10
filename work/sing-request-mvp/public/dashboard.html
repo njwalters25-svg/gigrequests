@@ -36,6 +36,28 @@
 
         <aside class="dashboard-side">
           <section class="panel dashboard-section">
+            <details class="settings-disclosure" open>
+              <summary>
+                <span>
+                  <span class="eyebrow">Current gig</span>
+                  <strong>Active gig controls</strong>
+                </span>
+                <span class="summary-action">Manage</span>
+              </summary>
+              <div class="gig-controls">
+                <div>
+                  <strong id="activeGigControlName">No active gig</strong>
+                  <p class="muted" id="activeGigControlMeta">Start a new gig to open audience requests.</p>
+                </div>
+                <div class="gig-control-actions">
+                  <button class="mini-button" type="button" id="editActiveGig">Edit details</button>
+                  <button class="mini-button danger-button" type="button" id="endActiveGig">End gig</button>
+                </div>
+              </div>
+            </details>
+          </section>
+
+          <section class="panel dashboard-section">
             <details class="settings-disclosure">
               <summary>
                 <span>
@@ -166,6 +188,8 @@
           <h2 id="gigDialogTitle">Start a fresh queue</h2>
           <p class="muted" id="gigDialogHint">The current gig will be archived automatically.</p>
         </div>
+        <input id="gigMode" type="hidden" value="create">
+        <input id="gigId" type="hidden">
         <label>
           Gig name
           <input id="gigName" maxlength="80" placeholder="Tonight's Set" required>

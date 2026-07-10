@@ -363,6 +363,38 @@ async function handleApi(req, res, url) {
     });
   }
 
+  if (req.method === "POST" && url.pathname.match(/^\/api\/gigs\/[^/]+\/end$/)) {
+    const id = url.pathname.split("/")[3];
+    return mutateDb(db => {
+      const gig = db.gigs.find(item => item.id === id);
+
+      if (!gig) return sendJson(res, 404, { error: "Gig not found." });
+      if (gig.status !== "active") return sendJson(res, 400, { error: "Only the active gig can be ended." });
+
+      gig.status = "archived";
+      gig.archivedAt = new Date().toISOString();
+      return sendJson(res, 200, { gig });
+    });
+  }
+
+  if (req.method === "PATCH" && url.pathname.startsWith("/api/gigs/")) {
+    const body = await readBody(req);
+    const id = url.pathname.split("/").pop();
+    return mutateDb(db => {
+      const gig = db.gigs.find(item => item.id === id);
+
+      if (!gig) return sendJson(res, 404, { error: "Gig not found." });
+      if (gig.status !== "active") return sendJson(res, 400, { error: "Only the active gig can be edited." });
+
+      if ("name" in body) gig.name = String(body.name || "New Gig").trim().slice(0, 80);
+      if ("venue" in body) gig.venue = String(body.venue || "").trim().slice(0, 80);
+      if ("scheduledAt" in body) gig.scheduledAt = String(body.scheduledAt || "").trim().slice(0, 40);
+      if ("notes" in body) gig.notes = String(body.notes || "").trim().slice(0, 240);
+
+      return sendJson(res, 200, { gig });
+    });
+  }
+
   if (req.method === "DELETE" && url.pathname.startsWith("/api/gigs/")) {
     const id = url.pathname.split("/").pop();
     return mutateDb(db => {

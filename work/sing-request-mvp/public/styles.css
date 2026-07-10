@@ -645,6 +645,23 @@ textarea {
   margin-top: 12px;
 }
 
+.gig-controls {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.gig-controls strong {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.gig-control-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .import-button {
   justify-self: start;
 }

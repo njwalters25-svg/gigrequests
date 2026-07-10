@@ -13,6 +13,10 @@ const els = {
   dashboardSinger: document.querySelector("#dashboardSinger"),
   activeGigName: document.querySelector("#activeGigName"),
   activeGigMeta: document.querySelector("#activeGigMeta"),
+  activeGigControlName: document.querySelector("#activeGigControlName"),
+  activeGigControlMeta: document.querySelector("#activeGigControlMeta"),
+  editActiveGig: document.querySelector("#editActiveGig"),
+  endActiveGig: document.querySelector("#endActiveGig"),
   stats: document.querySelector("#stats"),
   requestList: document.querySelector("#requestList"),
   publicSettingsForm: document.querySelector("#publicSettingsForm"),
@@ -65,6 +69,8 @@ const els = {
   gigDialogTitle: document.querySelector("#gigDialogTitle"),
   gigDialogHint: document.querySelector("#gigDialogHint"),
   gigForm: document.querySelector("#gigForm"),
+  gigMode: document.querySelector("#gigMode"),
+  gigId: document.querySelector("#gigId"),
   gigName: document.querySelector("#gigName"),
   gigVenue: document.querySelector("#gigVenue"),
   gigScheduledAt: document.querySelector("#gigScheduledAt"),
@@ -378,12 +384,21 @@ function renderArchiveDialog(gig) {
   els.archiveDialog.showModal();
 }
 
-function openGigForm(gig = null) {
+function openGigForm(gig = null, mode = "create") {
   els.gigForm.reset();
-  els.gigDialogTitle.textContent = gig ? "Start from archived gig" : "Start a fresh queue";
-  els.gigDialogHint.textContent = gig
-    ? "Review the details before starting the new active gig."
-    : "The current gig will be archived automatically.";
+  const isEdit = mode === "edit";
+  els.gigMode.value = mode;
+  els.gigId.value = isEdit ? gig?.id || "" : "";
+  els.gigDialogTitle.textContent = isEdit
+    ? "Edit active gig"
+    : gig
+      ? "Start from archived gig"
+      : "Start a fresh queue";
+  els.gigDialogHint.textContent = isEdit
+    ? "Update the details shown on the dashboard and audience page."
+    : gig
+      ? "Review the details before starting the new active gig."
+      : "The current gig will be archived automatically.";
   els.gigName.value = gig?.name || "Tonight's Set";
   els.gigVenue.value = gig?.venue || "";
   els.gigScheduledAt.value = localDateTimeValue(gig?.scheduledAt);
@@ -417,9 +432,17 @@ function renderDashboard() {
   if (activeGig) {
     els.activeGigName.textContent = activeGig.name;
     els.activeGigMeta.textContent = `${activeGig.venue || "No venue"}${activeGig.scheduledAt ? ` · ${dateTimeLabel(activeGig.scheduledAt)}` : ""} · started ${timeLabel(activeGig.startedAt)}`;
+    els.activeGigControlName.textContent = activeGig.name;
+    els.activeGigControlMeta.textContent = `${activeGig.venue || "No venue"}${activeGig.scheduledAt ? ` · ${dateTimeLabel(activeGig.scheduledAt)}` : ""} · requests are open`;
+    els.editActiveGig.disabled = false;
+    els.endActiveGig.disabled = false;
   } else {
     els.activeGigName.textContent = "No active gig";
     els.activeGigMeta.textContent = "Start a new gig to open audience requests.";
+    els.activeGigControlName.textContent = "No active gig";
+    els.activeGigControlMeta.textContent = "Start a new gig to open audience requests.";
+    els.editActiveGig.disabled = true;
+    els.endActiveGig.disabled = true;
   }
 
   renderRequests();
@@ -837,22 +860,45 @@ els.openGigDialog.addEventListener("click", () => {
   openGigForm();
 });
 
+els.editActiveGig.addEventListener("click", () => {
+  if (!state.dashboard.activeGig) return;
+  openGigForm(state.dashboard.activeGig, "edit");
+});
+
+els.endActiveGig.addEventListener("click", async () => {
+  const gig = state.dashboard.activeGig;
+  if (!gig) return;
+  if (!window.confirm(`End ${gig.name} and close audience requests?`)) return;
+
+  try {
+    await api(`/api/gigs/${gig.id}/end`, { method: "POST" });
+    showToast("Gig ended. Audience requests are closed.");
+    await loadDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+});
+
 els.cancelGig.addEventListener("click", () => els.gigDialog.close());
 
 els.gigForm.addEventListener("submit", async event => {
   event.preventDefault();
+  const mode = els.gigMode.value;
+  const isEdit = mode === "edit";
+  const body = JSON.stringify({
+    name: els.gigName.value,
+    venue: els.gigVenue.value,
+    scheduledAt: els.gigScheduledAt.value,
+    notes: els.gigNotes.value
+  });
+
   try {
-    await api("/api/gigs", {
-      method: "POST",
-      body: JSON.stringify({
-        name: els.gigName.value,
-        venue: els.gigVenue.value,
-        scheduledAt: els.gigScheduledAt.value,
-        notes: els.gigNotes.value
-      })
+    await api(isEdit ? `/api/gigs/${els.gigId.value}` : "/api/gigs", {
+      method: isEdit ? "PATCH" : "POST",
+      body
     });
     els.gigDialog.close();
-    showToast("New gig started. Previous gig archived.");
+    showToast(isEdit ? "Gig details updated." : "New gig started. Previous gig archived.");
     await loadDashboard();
   } catch (error) {
     showToast(error.message);
