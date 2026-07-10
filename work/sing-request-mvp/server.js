@@ -17,6 +17,17 @@ const contentTypes = {
   ".svg": "image/svg+xml"
 };
 
+const reservedRoutes = new Set([
+  "api",
+  "dashboard",
+  "healthz",
+  "login",
+  "pricing",
+  "request",
+  "signup",
+  "support"
+]);
+
 async function readDb() {
   return JSON.parse(await fs.readFile(DB_PATH, "utf8"));
 }
@@ -474,6 +485,19 @@ async function serveStatic(req, res, url) {
   if (filePath === "/dashboard") filePath = "/dashboard.html";
   if (filePath === "/request") filePath = "/index.html";
 
+  const slug = url.pathname.slice(1);
+  if (
+    slug &&
+    !slug.includes("/") &&
+    !slug.includes(".") &&
+    !reservedRoutes.has(slug.toLowerCase())
+  ) {
+    const db = await readDb();
+    if (slug.toLowerCase() === String(db.singer.slug || "").toLowerCase()) {
+      filePath = "/index.html";
+    }
+  }
+
   const resolved = path.normalize(path.join(PUBLIC_DIR, filePath));
   if (!resolved.startsWith(PUBLIC_DIR)) {
     res.writeHead(403);
@@ -495,6 +519,11 @@ async function serveStatic(req, res, url) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   try {
+    if (req.method === "GET" && url.pathname === "/healthz") {
+      sendJson(res, 200, { ok: true });
+      return;
+    }
+
     if (url.pathname.startsWith("/api/")) {
       await handleApi(req, res, url);
       return;

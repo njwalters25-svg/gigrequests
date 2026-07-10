@@ -1,8 +1,8 @@
 {
   "singer": {
     "id": "singer_1",
-    "stageName": "Luna Vale",
-    "slug": "luna",
+    "stageName": "Chelle's Jukebox",
+    "slug": "chellesjukebox",
     "tagline": "Live song requests"
   },
   "songs": [
@@ -140,17 +140,6 @@
       ],
       "available": true,
       "featured": false
-    },
-    {
-      "id": "song_bc653ece-a8bf-4d0f-a4ae-4ffdd519f2d7",
-      "title": "Delete Test Song",
-      "artist": "Codex Check",
-      "tags": [
-        "Test"
-      ],
-      "available": false,
-      "featured": false,
-      "deletedAt": "2026-07-10T11:18:37.079Z"
     }
   ],
   "gigs": [

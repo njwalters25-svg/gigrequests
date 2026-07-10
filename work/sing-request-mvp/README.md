@@ -5,6 +5,8 @@ A local MVP for a singer's live song-request app.
 ## What it does
 
 - Permanent audience request page at `/request`
+- Singer public URL at `/chellesjukebox`
+- Lightweight health check at `/healthz`
 - Singer dashboard at `/dashboard`
 - Local JSON database in `data/db.json`
 - Active gig model: starting a new gig archives the previous active gig
