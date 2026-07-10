@@ -1,0 +1,9 @@
+{
+  "name": "sing-request-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local MVP for live singer song requests.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Singer Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true">♪</div>
+          <div>
+            <h1>Singer Dashboard</h1>
+            <p id="dashboardSinger">Live request control</p>
+          </div>
+        </div>
+        <a class="navlink" href="/request">Audience page</a>
+      </header>
+
+      <section class="dashboard-grid">
+        <section class="panel dashboard-section">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Active gig</p>
+              <h2 id="activeGigName">Loading</h2>
+              <p class="muted" id="activeGigMeta"></p>
+            </div>
+            <button class="primary" type="button" id="openGigDialog">Start new gig</button>
+          </div>
+
+          <div class="stats" id="stats"></div>
+          <div class="request-list" id="requestList"></div>
+        </section>
+
+        <aside class="dashboard-side">
+          <section class="panel dashboard-section">
+            <details class="settings-disclosure">
+              <summary>
+                <span>
+                  <span class="eyebrow">Public page</span>
+                  <strong>Public page settings</strong>
+                </span>
+                <span class="summary-action">Edit</span>
+              </summary>
+              <form class="public-settings" id="publicSettingsForm">
+                <label>
+                  Singer name
+                  <input id="publicStageName" maxlength="80" placeholder="Luna Vale">
+                </label>
+                <label>
+                  Tagline
+                  <input id="publicTagline" maxlength="120" placeholder="Live song requests">
+                </label>
+                <label>
+                  Main heading
+                  <input id="publicHeroTitle" maxlength="80" placeholder="Pick the next song">
+                </label>
+                <label>
+                  Intro text
+                  <textarea id="publicHeroText" maxlength="220" placeholder="Browse the live song list..."></textarea>
+                </label>
+                <div class="image-field">
+                  <label>
+                    Singer photo
+                    <input id="publicProfileImageFile" type="file" accept="image/*">
+                  </label>
+                  <div class="image-preview profile-preview" id="publicProfileImagePreview"><span>No photo</span></div>
+                  <input id="publicProfileImageUrl" type="hidden">
+                  <button class="mini-button" type="button" data-clear-public-image="profile">Remove photo</button>
+                </div>
+                <div class="image-field">
+                  <label>
+                    Background image
+                    <input id="publicBackgroundImageFile" type="file" accept="image/*">
+                  </label>
+                  <div class="image-preview hero-preview" id="publicBackgroundImagePreview"><span>Default background</span></div>
+                  <input id="publicBackgroundImageUrl" type="hidden">
+                  <button class="mini-button" type="button" data-clear-public-image="background">Remove background</button>
+                </div>
+                <button class="mini-button" type="submit">Save public page</button>
+              </form>
+            </details>
+          </section>
+
+          <section class="panel dashboard-section">
+            <div class="section-title">
+              <div>
+                <p class="eyebrow">Song catalog</p>
+                <h2>Add and manage</h2>
+              </div>
+              <button class="ghost" type="button" id="openImportDialog">Bulk import</button>
+            </div>
+            <form class="song-add-form" id="songForm">
+              <input id="songTitle" maxlength="120" placeholder="Song title" required>
+              <input id="songArtist" maxlength="120" placeholder="Artist" required>
+              <input id="songTags" maxlength="160" placeholder="Tags: Pop, 60s, Soul">
+              <button class="primary" type="submit">Add song</button>
+            </form>
+            <div class="catalog-toolbar">
+              <input class="search" id="catalogSearch" type="search" placeholder="Search catalog">
+              <div class="segmented" aria-label="Catalog sort">
+                <button class="active" type="button" data-sort="title">Song A-Z</button>
+                <button type="button" data-sort="artist">Artist A-Z</button>
+              </div>
+            </div>
+            <form class="filter-settings" id="filterSettingsForm">
+              <label class="check-row">
+                <input id="audienceFiltersEnabled" type="checkbox">
+                Show quick filters on audience page
+              </label>
+              <label>
+                Quick filters
+                <input id="audienceFilters" maxlength="180" placeholder="Favourites, 80s, Wedding">
+              </label>
+              <button class="mini-button" type="submit">Save filters</button>
+            </form>
+            <div class="bulk-toolbar">
+              <div class="bulk-row">
+                <label class="select-visible">
+                  <input id="selectVisibleSongs" type="checkbox">
+                  Visible
+                </label>
+                <span class="muted" id="selectionCount">0 selected</span>
+              </div>
+              <div class="bulk-actions" aria-label="Selected song actions">
+                <button class="mini-button" type="button" data-bulk-action="favourite">Favourite</button>
+                <button class="mini-button" type="button" data-bulk-action="unfavourite">Unfavourite</button>
+                <button class="mini-button" type="button" data-bulk-action="available">Available</button>
+                <button class="mini-button" type="button" data-bulk-action="unavailable">Unavailable</button>
+                <button class="mini-button danger-button" type="button" data-bulk-action="delete">Delete</button>
+              </div>
+              <button class="mini-button set-button" type="button" id="makeVisibleOnly">Use search as available set</button>
+            </div>
+            <div class="song-admin-grid" id="songAdmin"></div>
+          </section>
+
+          <section class="panel dashboard-section" style="margin-top: 14px;">
+            <div class="section-title">
+              <div>
+                <p class="eyebrow">Archive</p>
+                <h2>Past gigs</h2>
+              </div>
+            </div>
+            <div class="archive-list" id="archiveList"></div>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <dialog class="dialog" id="gigDialog">
+      <form method="dialog" id="gigForm">
+        <div>
+          <p class="eyebrow">New active gig</p>
+          <h2 id="gigDialogTitle">Start a fresh queue</h2>
+          <p class="muted" id="gigDialogHint">The current gig will be archived automatically.</p>
+        </div>
+        <label>
+          Gig name
+          <input id="gigName" maxlength="80" placeholder="Tonight's Set" required>
+        </label>
+        <label>
+          Venue or event
+          <input id="gigVenue" maxlength="80" placeholder="The Blue Room">
+        </label>
+        <label>
+          Date and time
+          <input id="gigScheduledAt" type="datetime-local">
+        </label>
+        <label>
+          Notes
+          <textarea id="gigNotes" maxlength="240" placeholder="Optional"></textarea>
+        </label>
+        <div class="request-actions">
+          <button class="primary" type="submit">Start gig</button>
+          <button class="ghost" value="cancel" type="button" id="cancelGig">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="dialog wide-dialog" id="importDialog">
+      <form method="dialog" id="importForm">
+        <div>
+          <p class="eyebrow">Bulk import</p>
+          <h2>Paste songs</h2>
+          <p class="muted">Use CSV rows: title, artist, tags. Tags can be separated with semicolons or pipes.</p>
+        </div>
+        <label>
+          Song rows
+          <textarea id="importText" class="import-box" placeholder="Valerie, Amy Winehouse, Soul; Pop; 2000s&#10;Can't Help Falling in Love, Elvis Presley, Classic; 60s; Wedding"></textarea>
+        </label>
+        <div class="request-actions">
+          <button class="primary" type="submit">Import songs</button>
+          <button class="ghost" value="cancel" type="button" id="cancelImport">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="dialog" id="editSongDialog">
+      <form method="dialog" id="editSongForm">
+        <div>
+          <p class="eyebrow">Edit song</p>
+          <h2 id="editSongHeading">Song details</h2>
+        </div>
+        <label>
+          Song title
+          <input id="editSongTitle" maxlength="120" required>
+        </label>
+        <label>
+          Artist
+          <input id="editSongArtist" maxlength="120" required>
+        </label>
+        <label>
+          Tags
+          <input id="editSongTags" maxlength="180" placeholder="Pop, 60s, Wedding">
+        </label>
+        <label class="check-row">
+          <input id="editSongAvailable" type="checkbox">
+          Available to request
+        </label>
+        <label class="check-row">
+          <input id="editSongFeatured" type="checkbox">
+          Favourite on audience page
+        </label>
+        <div class="request-actions">
+          <button class="primary" type="submit">Save changes</button>
+          <button class="mini-button danger-button" type="button" id="deleteSong">Delete song</button>
+          <button class="ghost" value="cancel" type="button" id="cancelEditSong">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="dialog wide-dialog" id="archiveDialog">
+      <form method="dialog">
+        <div>
+          <p class="eyebrow">Archived gig</p>
+          <h2 id="archiveDialogTitle">Gig details</h2>
+          <p class="muted" id="archiveDialogMeta"></p>
+        </div>
+        <div class="archive-request-list" id="archiveRequestList"></div>
+        <div class="request-actions">
+          <button class="primary" type="button" id="startFromArchive">Start new from this</button>
+          <button class="ghost" type="button" id="closeArchiveDialog">Close</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/dashboard.js"></script>
+  </body>
+</html>

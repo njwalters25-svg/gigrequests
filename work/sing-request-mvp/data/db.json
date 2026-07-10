@@ -1,0 +1,351 @@
+{
+  "singer": {
+    "id": "singer_1",
+    "stageName": "Luna Vale",
+    "slug": "luna",
+    "tagline": "Live song requests"
+  },
+  "songs": [
+    {
+      "id": "song_1",
+      "title": "Valerie",
+      "artist": "Amy Winehouse",
+      "available": false,
+      "featured": false,
+      "tags": [
+        "Soul",
+        "Pop",
+        "2000s",
+        "Crowd favourite"
+      ]
+    },
+    {
+      "id": "song_2",
+      "title": "Dreams",
+      "artist": "Fleetwood Mac",
+      "genre": "Rock",
+      "decade": "1970s",
+      "available": true,
+      "featured": false
+    },
+    {
+      "id": "song_3",
+      "title": "Someone Like You",
+      "artist": "Adele",
+      "genre": "Ballad",
+      "decade": "2010s",
+      "available": false,
+      "featured": false
+    },
+    {
+      "id": "song_4",
+      "title": "Jolene",
+      "artist": "Dolly Parton",
+      "genre": "Country",
+      "decade": "1970s",
+      "available": true,
+      "featured": false
+    },
+    {
+      "id": "song_5",
+      "title": "Flowers",
+      "artist": "Miley Cyrus",
+      "genre": "Pop",
+      "decade": "2020s",
+      "available": false,
+      "featured": false
+    },
+    {
+      "id": "song_6",
+      "title": "Make You Feel My Love",
+      "artist": "Adele",
+      "genre": "Ballad",
+      "decade": "2000s",
+      "available": false,
+      "featured": false
+    },
+    {
+      "id": "song_7",
+      "title": "Can't Help Falling in Love",
+      "artist": "Elvis Presley",
+      "genre": "Classic",
+      "decade": "1960s",
+      "available": false,
+      "featured": false
+    },
+    {
+      "id": "song_8",
+      "title": "Shallow",
+      "artist": "Lady Gaga & Bradley Cooper",
+      "genre": "Soundtrack",
+      "decade": "2010s",
+      "available": false,
+      "featured": false
+    },
+    {
+      "id": "song_f8d8680c-9ad7-4ed2-b604-dbb4bad20e05",
+      "title": "Respect",
+      "artist": "Aretha Franklin",
+      "tags": [
+        "Soul",
+        "60s",
+        "Pop"
+      ],
+      "available": false,
+      "featured": false
+    },
+    {
+      "id": "song_0959ffb9-a9cb-4b12-b4ee-b2ca77814a1f",
+      "title": "Dancing Queen",
+      "artist": "ABBA",
+      "tags": [
+        "Disco",
+        "70s",
+        "Pop"
+      ],
+      "available": true,
+      "featured": false
+    },
+    {
+      "id": "song_3a2289b1-c6fc-4f75-9df0-bd1c0f59d50e",
+      "title": "At Last",
+      "artist": "Etta James",
+      "tags": [
+        "Soul",
+        "60s",
+        "First dance"
+      ],
+      "available": false,
+      "featured": false
+    },
+    {
+      "id": "song_762f33cd-5345-471a-bee1-0c62fb80b690",
+      "title": "Be My Baby",
+      "artist": "The Ronettes",
+      "tags": [
+        "Pop",
+        "60s"
+      ],
+      "available": false,
+      "featured": false
+    },
+    {
+      "id": "song_ae9ee9a0-6ead-4331-83b2-f97bb3212c7d",
+      "title": "September",
+      "artist": "Earth Wind & Fire",
+      "tags": [
+        "Funk",
+        "70s",
+        "Party"
+      ],
+      "available": true,
+      "featured": false
+    },
+    {
+      "id": "song_bc653ece-a8bf-4d0f-a4ae-4ffdd519f2d7",
+      "title": "Delete Test Song",
+      "artist": "Codex Check",
+      "tags": [
+        "Test"
+      ],
+      "available": false,
+      "featured": false,
+      "deletedAt": "2026-07-10T11:18:37.079Z"
+    }
+  ],
+  "gigs": [
+    {
+      "id": "gig_1",
+      "name": "Tonight's Set",
+      "venue": "The Blue Room",
+      "status": "archived",
+      "startedAt": "2026-07-07T14:00:00.000Z",
+      "archivedAt": "2026-07-07T16:29:57.774Z"
+    },
+    {
+      "id": "gig_1fce706d-a135-42b9-9bfd-a651f8c274ac",
+      "name": "Tonight's Set",
+      "venue": "",
+      "status": "archived",
+      "startedAt": "2026-07-07T16:29:57.774Z",
+      "archivedAt": "2026-07-07T17:09:18.895Z"
+    },
+    {
+      "id": "gig_d3f727cb-ed29-4392-af8f-d841b237734e",
+      "name": "80s",
+      "venue": "Somewhere",
+      "status": "archived",
+      "startedAt": "2026-07-07T17:09:18.895Z",
+      "archivedAt": "2026-07-08T07:15:12.766Z"
+    },
+    {
+      "id": "gig_32bb332b-7302-4703-b68c-921596b5fb6c",
+      "name": "Tonight's Set",
+      "venue": "",
+      "status": "archived",
+      "startedAt": "2026-07-08T07:15:12.766Z",
+      "archivedAt": "2026-07-09T12:10:58.866Z"
+    },
+    {
+      "id": "gig_26a12a64-7f64-4fa8-9f51-4ee5c1bdc34d",
+      "name": "80s",
+      "venue": "Somewhere",
+      "status": "archived",
+      "startedAt": "2026-07-09T12:10:58.866Z",
+      "archivedAt": "2026-07-09T12:11:09.711Z"
+    },
+    {
+      "id": "gig_cfc8b138-f319-4b4b-ae34-736821c39a92",
+      "name": "Tonight's Set",
+      "venue": "",
+      "status": "archived",
+      "startedAt": "2026-07-09T12:11:09.711Z",
+      "archivedAt": "2026-07-09T12:11:24.449Z"
+    },
+    {
+      "id": "gig_d2321d14-7424-4e26-95b6-67e38648a9a8",
+      "name": "Tonight's Set",
+      "venue": "The Blue Room",
+      "status": "archived",
+      "startedAt": "2026-07-09T12:11:24.449Z",
+      "archivedAt": "2026-07-09T12:12:40.646Z"
+    },
+    {
+      "id": "gig_64b1b613-2af1-4f28-9cca-92e2bd11ae0b",
+      "name": "Tonight's Set",
+      "venue": "Testing",
+      "status": "archived",
+      "startedAt": "2026-07-09T12:12:40.646Z",
+      "archivedAt": "2026-07-09T12:12:54.114Z"
+    },
+    {
+      "id": "gig_02917354-c7e5-4569-84bc-35f96674b48c",
+      "name": "Tonight's Set",
+      "venue": "The Blue Room",
+      "status": "archived",
+      "startedAt": "2026-07-09T12:12:54.114Z",
+      "archivedAt": "2026-07-09T12:13:01.868Z"
+    },
+    {
+      "id": "gig_d7973ee9-4577-4887-a17e-f0e603e5d733",
+      "name": "Tonight's Set",
+      "venue": "Testing",
+      "status": "archived",
+      "startedAt": "2026-07-09T12:13:01.868Z",
+      "archivedAt": "2026-07-09T12:13:24.895Z"
+    },
+    {
+      "id": "gig_a225b56b-a2e8-49bb-8a1e-76a5f0ddd404",
+      "name": "80s",
+      "venue": "Somewhere",
+      "status": "archived",
+      "startedAt": "2026-07-09T12:13:24.895Z",
+      "archivedAt": "2026-07-09T12:15:48.852Z"
+    },
+    {
+      "id": "gig_23c464cd-9594-46da-9419-0de708d5a1f0",
+      "name": "Tonight's Set",
+      "venue": "",
+      "scheduledAt": "",
+      "notes": "",
+      "status": "active",
+      "startedAt": "2026-07-09T12:16:32.617Z",
+      "archivedAt": null
+    }
+  ],
+  "requests": [
+    {
+      "id": "req_1",
+      "gigId": "gig_1",
+      "songId": "song_2",
+      "guestName": "Maya",
+      "message": "For table 4",
+      "status": "done",
+      "createdAt": "2026-07-07T14:10:00.000Z"
+    },
+    {
+      "id": "req_926dd162-0815-4033-8106-9f2e4b7b75e8",
+      "gigId": "gig_1",
+      "songId": "song_1",
+      "guestName": "Codex",
+      "message": "Test request",
+      "status": "skipped",
+      "createdAt": "2026-07-07T14:19:39.552Z"
+    },
+    {
+      "id": "req_421bb827-101f-46db-b438-cae75974bd2b",
+      "gigId": "gig_1",
+      "songId": "song_2",
+      "guestName": "Nicola",
+      "message": "Hi",
+      "status": "done",
+      "createdAt": "2026-07-07T16:25:04.460Z"
+    },
+    {
+      "id": "req_cd2bf21d-95c8-41de-a814-ae8664da1f68",
+      "gigId": "gig_1",
+      "songId": "song_4",
+      "guestName": "khgk",
+      "message": "jkh",
+      "status": "queued",
+      "createdAt": "2026-07-07T16:27:22.747Z"
+    },
+    {
+      "id": "req_472825a5-c24b-4456-97ba-9400c8df09a3",
+      "gigId": "gig_1fce706d-a135-42b9-9bfd-a651f8c274ac",
+      "songId": "song_4",
+      "guestName": "Nicola",
+      "message": "Table 3",
+      "status": "done",
+      "createdAt": "2026-07-07T17:07:40.765Z"
+    },
+    {
+      "id": "req_433f7363-fafa-4773-9946-83f016d90e3d",
+      "gigId": "gig_d3f727cb-ed29-4392-af8f-d841b237734e",
+      "songId": "song_2",
+      "guestName": "",
+      "message": "",
+      "status": "queued",
+      "createdAt": "2026-07-07T17:09:32.954Z"
+    },
+    {
+      "id": "req_6386028b-9065-4406-a71a-499a89eaa440",
+      "gigId": "gig_d3f727cb-ed29-4392-af8f-d841b237734e",
+      "songId": "song_5",
+      "guestName": "",
+      "message": "",
+      "status": "singing",
+      "createdAt": "2026-07-07T17:09:34.614Z"
+    },
+    {
+      "id": "req_45c051fe-5b81-4871-8d80-ddc53a62bc0e",
+      "gigId": "gig_d3f727cb-ed29-4392-af8f-d841b237734e",
+      "songId": "song_7",
+      "guestName": "",
+      "message": "",
+      "status": "new",
+      "createdAt": "2026-07-07T17:09:36.784Z"
+    },
+    {
+      "id": "req_779e5470-b663-410c-a815-22f35270f8f7",
+      "gigId": "gig_d3f727cb-ed29-4392-af8f-d841b237734e",
+      "songId": "song_4",
+      "guestName": "",
+      "message": "",
+      "status": "done",
+      "createdAt": "2026-07-07T17:09:38.583Z"
+    }
+  ],
+  "settings": {
+    "audienceFiltersEnabled": false,
+    "audienceFilters": [
+      "Favourites",
+      "70s",
+      "Party"
+    ],
+    "heroTitle": "Pick the next song",
+    "heroText": "Browse the live song list, send a request, and it will appear straight on the singer dashboard.",
+    "profileImageUrl": "",
+    "backgroundImageUrl": ""
+  }
+}

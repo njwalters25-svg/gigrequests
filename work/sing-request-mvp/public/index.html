@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Song Requests</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" id="profileMark" aria-hidden="true">
+            <span>♪</span>
+            <img id="profileImage" alt="">
+          </div>
+          <div>
+            <h1 id="singerName">Song Requests</h1>
+            <p id="tagline">Choose a song for tonight</p>
+          </div>
+        </div>
+        <a class="navlink" href="/dashboard">Singer dashboard</a>
+      </header>
+
+      <section class="hero">
+        <div class="intro">
+          <h2 id="heroTitle">Pick the next song</h2>
+          <p id="heroText">Browse the live song list, send a request, and it will appear straight on the singer's dashboard.</p>
+        </div>
+
+        <section class="panel request-panel" aria-labelledby="requestHeading">
+          <div class="gig-strip">
+            <div>
+              <p class="eyebrow">Now taking requests</p>
+              <h2 id="requestHeading">Loading current gig</h2>
+              <p class="muted" id="gigVenue"></p>
+            </div>
+            <button class="ghost" id="refreshButton" type="button">Refresh</button>
+          </div>
+
+          <div class="toolbar">
+            <input class="search" id="searchInput" type="search" placeholder="Search song, artist, era, tag">
+            <div class="segmented" aria-label="Song sort">
+              <button class="active" type="button" data-sort="title">Song A-Z</button>
+              <button type="button" data-sort="artist">Artist A-Z</button>
+            </div>
+            <div class="chips audience-filters" id="genreChips" aria-label="Quick filters"></div>
+          </div>
+
+          <div class="song-list" id="songList"></div>
+        </section>
+      </section>
+    </main>
+
+    <dialog class="dialog" id="requestDialog">
+      <form method="dialog" id="requestForm">
+        <div>
+          <p class="eyebrow">Request song</p>
+          <h2 id="dialogSongTitle">Song title</h2>
+          <p class="muted" id="dialogSongArtist">Artist</p>
+        </div>
+        <label>
+          Your name
+          <input id="guestName" maxlength="80" placeholder="Optional">
+        </label>
+        <label>
+          Message or table number
+          <textarea id="message" maxlength="180" placeholder="Optional"></textarea>
+        </label>
+        <div class="request-actions">
+          <button class="primary" type="submit">Send request</button>
+          <button class="ghost" value="cancel" type="button" id="cancelRequest">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/request.js"></script>
+  </body>
+</html>
