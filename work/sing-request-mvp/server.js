@@ -518,9 +518,10 @@ async function handleApi(req, res, url) {
     const body = await readBody(req);
     const ids = new Set(Array.isArray(body.ids) ? body.ids.map(String) : []);
     const updates = body.updates && typeof body.updates === "object" ? body.updates : {};
+    const shouldDelete = body.action === "delete";
 
     if (!ids.size) return sendJson(res, 400, { error: "Choose at least one song." });
-    if (!("available" in updates) && !("featured" in updates)) {
+    if (!shouldDelete && !("available" in updates) && !("featured" in updates)) {
       return sendJson(res, 400, { error: "Choose a bulk action." });
     }
 
@@ -530,6 +531,13 @@ async function handleApi(req, res, url) {
       db.songs.forEach(song => {
         if (song.deletedAt) return;
         if (!ids.has(song.id)) return;
+        if (shouldDelete) {
+          song.deletedAt = new Date().toISOString();
+          song.available = false;
+          song.featured = false;
+          updated.push(songView(song));
+          return;
+        }
         if ("available" in updates) song.available = Boolean(updates.available);
         if ("featured" in updates) song.featured = Boolean(updates.featured);
         updated.push(songView(song));

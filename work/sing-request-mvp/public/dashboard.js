@@ -552,9 +552,12 @@ document.querySelector(".bulk-toolbar").addEventListener("click", async event =>
     if (!window.confirm(`Delete ${ids.length} selected song${ids.length === 1 ? "" : "s"} from the catalog?`)) return;
 
     try {
-      await Promise.all(ids.map(id => api(`/api/songs/${id}`, { method: "DELETE" })));
+      const result = await api("/api/songs/bulk", {
+        method: "PATCH",
+        body: JSON.stringify({ ids, action: "delete" })
+      });
       state.selectedSongIds.clear();
-      showToast(`Deleted ${ids.length} song${ids.length === 1 ? "" : "s"}.`);
+      showToast(`Deleted ${result.count} song${result.count === 1 ? "" : "s"}.`);
       await loadDashboard();
     } catch (error) {
       showToast(error.message);
