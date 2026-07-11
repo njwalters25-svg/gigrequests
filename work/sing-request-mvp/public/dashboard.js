@@ -231,6 +231,7 @@ function renderRequests() {
     const groupRequests = group.requests.sort(requestSort);
     const topStatus = groupRequests[0]?.status || "new";
     const isRepeat = groupRequests.length > 1;
+    const requestIds = groupRequests.map(request => request.id).join(",");
 
     return `
     <article class="request-card ${isRepeat ? "repeat-request" : ""}" data-status="${topStatus}">
@@ -252,14 +253,14 @@ function renderRequests() {
               ${request.message ? `<p>${escapeHtml(request.message)}</p>` : ""}
               <p class="muted">Requested at ${timeLabel(request.createdAt)}</p>
             </div>
-            <div class="status-row">
-              ${statuses.map(status => `
-                <button class="status-button ${status === request.status ? "active" : ""}" type="button" data-request-id="${request.id}" data-status="${status}">
-                  ${statusLabels[status]}
-                </button>
-              `).join("")}
-            </div>
           </div>
+        `).join("")}
+      </div>
+      <div class="status-row">
+        ${statuses.map(status => `
+          <button class="status-button ${status === topStatus ? "active" : ""}" type="button" data-request-ids="${requestIds}" data-status="${status}">
+            ${statusLabels[status]}
+          </button>
         `).join("")}
       </div>
     </article>
@@ -463,13 +464,17 @@ async function loadDashboard() {
 }
 
 els.requestList.addEventListener("click", async event => {
-  const button = event.target.closest("[data-request-id]");
+  const button = event.target.closest("[data-request-id], [data-request-ids]");
   if (!button) return;
+  const requestIds = button.dataset.requestIds
+    ? button.dataset.requestIds.split(",").filter(Boolean)
+    : [button.dataset.requestId];
+
   try {
-    await api(`/api/requests/${button.dataset.requestId}`, {
+    await Promise.all(requestIds.map(id => api(`/api/requests/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status: button.dataset.status })
-    });
+    })));
     await loadDashboard();
   } catch (error) {
     showToast(error.message);
