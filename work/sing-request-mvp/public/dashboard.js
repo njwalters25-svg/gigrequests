@@ -95,7 +95,7 @@ function showToast(message) {
 }
 
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
+  return String(value == null ? "" : value).replace(/[&<>"']/g, char => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
@@ -104,11 +104,28 @@ function escapeHtml(value) {
   })[char]);
 }
 
+function openDialog(dialog) {
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+    return;
+  }
+
+  dialog.setAttribute("open", "");
+}
+
+function closeDialog(dialog) {
+  if (typeof dialog.close === "function") {
+    dialog.close();
+    return;
+  }
+
+  dialog.removeAttribute("open");
+}
+
 async function api(path, options) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json" },
-    ...options
-  });
+  const fetchOptions = options || {};
+  fetchOptions.headers = Object.assign({ "Content-Type": "application/json" }, fetchOptions.headers || {});
+  const response = await fetch(path, fetchOptions);
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "Something went wrong.");
   return data;
@@ -185,7 +202,10 @@ function renderImagePreview(element, value, emptyText) {
 }
 
 function renderStats(requests) {
-  const counts = Object.fromEntries(statuses.map(status => [status, 0]));
+  const counts = statuses.reduce((result, status) => {
+    result[status] = 0;
+    return result;
+  }, {});
   requests.forEach(request => counts[request.status] += 1);
   els.stats.innerHTML = [
     ["New", counts.new],
@@ -207,7 +227,7 @@ function requestSort(a, b) {
 }
 
 function renderRequests() {
-  const requests = [...state.dashboard.requests].sort(requestSort);
+  const requests = state.dashboard.requests.slice().sort(requestSort);
   renderStats(requests);
 
   if (!requests.length) {
@@ -216,7 +236,7 @@ function renderRequests() {
   }
 
   const groups = requests.reduce((items, request) => {
-    const key = request.songId || `${request.song?.title || "Unknown song"}-${request.song?.artist || ""}`;
+    const key = request.songId || `${request.song && request.song.title || "Unknown song"}-${request.song && request.song.artist || ""}`;
     const group = items.get(key) || {
       key,
       song: request.song,
@@ -227,9 +247,9 @@ function renderRequests() {
     return items;
   }, new Map());
 
-  els.requestList.innerHTML = [...groups.values()].map(group => {
+  els.requestList.innerHTML = Array.from(groups.values()).map(group => {
     const groupRequests = group.requests.sort(requestSort);
-    const topStatus = groupRequests[0]?.status || "new";
+    const topStatus = groupRequests[0] && groupRequests[0].status || "new";
     const isRepeat = groupRequests.length > 1;
     const requestIds = groupRequests.map(request => request.id).join(",");
 
@@ -237,8 +257,8 @@ function renderRequests() {
     <article class="request-card ${isRepeat ? "repeat-request" : ""}" data-status="${topStatus}">
       <div class="section-title">
         <div>
-          <h3>${escapeHtml(group.song?.title || "Unknown song")}</h3>
-          <p>${escapeHtml(group.song?.artist || "")}</p>
+          <h3>${escapeHtml(group.song && group.song.title || "Unknown song")}</h3>
+          <p>${escapeHtml(group.song && group.song.artist || "")}</p>
         </div>
         <div class="request-badges">
           ${isRepeat ? `<span class="repeat-pill">${groupRequests.length} requests</span>` : ""}
@@ -284,7 +304,7 @@ function findSong(id) {
 function catalogMatches(song) {
   const query = state.catalogQuery.toLowerCase();
   if (!query) return true;
-  return `${song.title} ${song.artist} ${tagsFor(song).join(" ")}`.toLowerCase().includes(query);
+  return `${song.title} ${song.artist} ${tagsFor(song).join(" ")}`.toLowerCase().indexOf(query) !== -1;
 }
 
 function visibleSongs() {
@@ -373,8 +393,8 @@ function renderArchiveDialog(gig) {
     els.archiveRequestList.innerHTML = gig.requests.map(request => `
       <article class="archive-request">
         <div>
-          <strong>${escapeHtml(request.song?.title || "Unknown song")}</strong>
-          <p>${escapeHtml(request.song?.artist || "")}</p>
+          <strong>${escapeHtml(request.song && request.song.title || "Unknown song")}</strong>
+          <p>${escapeHtml(request.song && request.song.artist || "")}</p>
         </div>
         <span class="status-pill" data-status="${request.status}">${statusLabels[request.status] || request.status}</span>
         <p class="muted">${request.guestName ? escapeHtml(request.guestName) : "Anonymous"}${request.message ? ` · ${escapeHtml(request.message)}` : ""}</p>
@@ -382,14 +402,14 @@ function renderArchiveDialog(gig) {
     `).join("");
   }
 
-  els.archiveDialog.showModal();
+  openDialog(els.archiveDialog);
 }
 
 function openGigForm(gig = null, mode = "create") {
   els.gigForm.reset();
   const isEdit = mode === "edit";
   els.gigMode.value = mode;
-  els.gigId.value = isEdit ? gig?.id || "" : "";
+  els.gigId.value = isEdit ? (gig && gig.id || "") : "";
   els.gigDialogTitle.textContent = isEdit
     ? "Edit active gig"
     : gig
@@ -400,11 +420,11 @@ function openGigForm(gig = null, mode = "create") {
     : gig
       ? "Review the details before starting the new active gig."
       : "The current gig will be archived automatically.";
-  els.gigName.value = gig?.name || "Tonight's Set";
-  els.gigVenue.value = gig?.venue || "";
-  els.gigScheduledAt.value = localDateTimeValue(gig?.scheduledAt);
-  els.gigNotes.value = gig?.notes || "";
-  els.gigDialog.showModal();
+  els.gigName.value = gig && gig.name || "Tonight's Set";
+  els.gigVenue.value = gig && gig.venue || "";
+  els.gigScheduledAt.value = localDateTimeValue(gig && gig.scheduledAt);
+  els.gigNotes.value = gig && gig.notes || "";
+  openDialog(els.gigDialog);
 }
 
 function renderDashboard() {
@@ -447,7 +467,7 @@ function renderDashboard() {
   }
 
   renderRequests();
-  state.selectedSongIds = new Set([...state.selectedSongIds].filter(id =>
+  state.selectedSongIds = new Set(Array.from(state.selectedSongIds).filter(id =>
     state.dashboard.songs.some(song => song.id === id)
   ));
   renderSongs();
@@ -543,7 +563,7 @@ document.querySelector(".bulk-toolbar").addEventListener("click", async event =>
   const button = event.target.closest("[data-bulk-action]");
   if (!button) return;
 
-  const ids = [...state.selectedSongIds];
+  const ids = Array.from(state.selectedSongIds);
   if (button.dataset.bulkAction === "delete") {
     if (!ids.length) {
       showToast("Choose at least one song.");
@@ -578,7 +598,7 @@ document.querySelector(".bulk-toolbar").addEventListener("click", async event =>
 els.makeVisibleOnly.addEventListener("click", async () => {
   const visibleIds = visibleSongs().map(song => song.id);
   const hiddenIds = state.dashboard.songs
-    .filter(song => !visibleIds.includes(song.id))
+    .filter(song => visibleIds.indexOf(song.id) === -1)
     .map(song => song.id);
 
   if (!visibleIds.length) {
@@ -623,7 +643,7 @@ els.songAdmin.addEventListener("click", event => {
   els.editSongTags.value = tagsFor(song).join(", ");
   els.editSongAvailable.checked = Boolean(song.available);
   els.editSongFeatured.checked = Boolean(song.featured);
-  els.editSongDialog.showModal();
+  openDialog(els.editSongDialog);
 });
 
 document.querySelector(".segmented").addEventListener("click", event => {
@@ -722,7 +742,7 @@ els.deleteSong.addEventListener("click", async () => {
   try {
     await api(`/api/songs/${song.id}`, { method: "DELETE" });
     state.editingSongId = null;
-    els.editSongDialog.close();
+    closeDialog(els.editSongDialog);
     showToast("Song deleted.");
     await loadDashboard();
   } catch (error) {
@@ -776,7 +796,7 @@ els.archiveList.addEventListener("click", async event => {
 
     if (deleteButton) {
       const gig = state.dashboard.archivedGigs.find(item => item.id === deleteButton.dataset.deleteArchiveId);
-      const name = gig?.name || "this archived gig";
+      const name = gig && gig.name || "this archived gig";
       if (!window.confirm(`Delete ${name} and its saved requests?`)) return;
 
       await api(`/api/gigs/${deleteButton.dataset.deleteArchiveId}`, { method: "DELETE" });
@@ -788,12 +808,12 @@ els.archiveList.addEventListener("click", async event => {
   }
 });
 
-els.closeArchiveDialog.addEventListener("click", () => els.archiveDialog.close());
+els.closeArchiveDialog.addEventListener("click", () => closeDialog(els.archiveDialog));
 
 els.startFromArchive.addEventListener("click", async () => {
   if (!state.archiveGig) return;
   openGigForm(state.archiveGig);
-  els.archiveDialog.close();
+  closeDialog(els.archiveDialog);
 });
 
 els.songForm.addEventListener("submit", async event => {
@@ -818,10 +838,10 @@ els.songForm.addEventListener("submit", async event => {
 
 els.openImportDialog.addEventListener("click", () => {
   els.importForm.reset();
-  els.importDialog.showModal();
+  openDialog(els.importDialog);
 });
 
-els.cancelImport.addEventListener("click", () => els.importDialog.close());
+els.cancelImport.addEventListener("click", () => closeDialog(els.importDialog));
 
 els.importForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -830,7 +850,7 @@ els.importForm.addEventListener("submit", async event => {
       method: "POST",
       body: JSON.stringify({ text: els.importText.value })
     });
-    els.importDialog.close();
+    closeDialog(els.importDialog);
     showToast(`Imported ${result.imported.length} song${result.imported.length === 1 ? "" : "s"}.`);
     await loadDashboard();
   } catch (error) {
@@ -838,7 +858,7 @@ els.importForm.addEventListener("submit", async event => {
   }
 });
 
-els.cancelEditSong.addEventListener("click", () => els.editSongDialog.close());
+els.cancelEditSong.addEventListener("click", () => closeDialog(els.editSongDialog));
 
 els.editSongForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -855,7 +875,7 @@ els.editSongForm.addEventListener("submit", async event => {
         featured: els.editSongFeatured.checked
       })
     });
-    els.editSongDialog.close();
+    closeDialog(els.editSongDialog);
     state.editingSongId = null;
     showToast("Song updated.");
     await loadDashboard();
@@ -887,7 +907,7 @@ els.endActiveGig.addEventListener("click", async () => {
   }
 });
 
-els.cancelGig.addEventListener("click", () => els.gigDialog.close());
+els.cancelGig.addEventListener("click", () => closeDialog(els.gigDialog));
 
 els.gigForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -905,7 +925,7 @@ els.gigForm.addEventListener("submit", async event => {
       method: isEdit ? "PATCH" : "POST",
       body
     });
-    els.gigDialog.close();
+    closeDialog(els.gigDialog);
     showToast(isEdit ? "Gig details updated." : "New gig started. Previous gig archived.");
     await loadDashboard();
   } catch (error) {

@@ -85,8 +85,8 @@ function songMatches(song) {
   const lowerTags = tags.map(tag => tag.toLowerCase());
   const selectedFilter = state.selectedFilter.toLowerCase();
   const filterMatch = state.selectedFilter === "All" ||
-    (selectedFilter === favouriteFilter.toLowerCase() ? song.featured : lowerTags.includes(selectedFilter));
-  const textMatch = !query || `${song.title} ${song.artist} ${tags.join(" ")}`.toLowerCase().includes(query);
+    (selectedFilter === favouriteFilter.toLowerCase() ? song.featured : lowerTags.indexOf(selectedFilter) !== -1);
+  const textMatch = !query || `${song.title} ${song.artist} ${tags.join(" ")}`.toLowerCase().indexOf(query) !== -1;
   return filterMatch && textMatch;
 }
 
@@ -130,9 +130,9 @@ function renderGenres() {
   const configuredFilters = Array.isArray(state.settings.audienceFilters)
     ? state.settings.audienceFilters
     : [];
-  const filters = ["All", ...configuredFilters].slice(0, 8);
+  const filters = ["All"].concat(configuredFilters).slice(0, 8);
 
-  if (!filters.includes(state.selectedFilter)) state.selectedFilter = "All";
+  if (filters.indexOf(state.selectedFilter) === -1) state.selectedFilter = "All";
 
   els.genreChips.innerHTML = filters.map(filter => `
     <button class="chip ${filter === state.selectedFilter ? "active" : ""}" type="button" data-filter="${filter}">
