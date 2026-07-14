@@ -952,6 +952,16 @@ textarea {
   }
 }
 
+@media (min-width: 841px) and (max-width: 1100px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .intro {
+    min-height: 260px;
+  }
+}
+
 @media (max-width: 560px) {
   .shell {
     width: min(100% - 20px, 1120px);
