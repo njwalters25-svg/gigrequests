@@ -73,6 +73,17 @@
       </form>
     </dialog>
 
+    <dialog class="dialog status-dialog" id="pausedDialog">
+      <div class="status-dialog-content">
+        <p class="eyebrow">Requests paused</p>
+        <h2>Song requests are paused right now</h2>
+        <p class="muted">Please check back in a little while.</p>
+        <div class="request-actions">
+          <button class="primary" type="button" id="closePausedDialog">OK</button>
+        </div>
+      </div>
+    </dialog>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="/request.js"></script>
   </body>

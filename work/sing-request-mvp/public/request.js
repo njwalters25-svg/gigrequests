@@ -28,12 +28,14 @@ const els = {
   sortButtons: document.querySelectorAll("[data-sort]"),
   refreshButton: document.querySelector("#refreshButton"),
   dialog: document.querySelector("#requestDialog"),
+  pausedDialog: document.querySelector("#pausedDialog"),
   form: document.querySelector("#requestForm"),
   dialogSongTitle: document.querySelector("#dialogSongTitle"),
   dialogSongArtist: document.querySelector("#dialogSongArtist"),
   guestName: document.querySelector("#guestName"),
   message: document.querySelector("#message"),
   cancelRequest: document.querySelector("#cancelRequest"),
+  closePausedDialog: document.querySelector("#closePausedDialog"),
   toast: document.querySelector("#toast")
 };
 
@@ -175,26 +177,40 @@ function renderSongs() {
   `).join("");
 }
 
+function applyPublicData(data) {
+  renderPublicSettings(data);
+  state.songs = data.songs;
+  state.settings = data.settings || state.settings;
+  state.requestsPaused = Boolean(data.activeGig && data.activeGig.requestsPaused);
+
+  if (data.activeGig) {
+    els.requestHeading.textContent = data.activeGig.name;
+    els.gigVenue.textContent = state.requestsPaused
+      ? "Requests are paused"
+      : data.activeGig.venue || "Requests are open";
+  } else {
+    els.requestHeading.textContent = "Requests are closed";
+    els.gigVenue.textContent = "Check back during the next performance.";
+  }
+
+  renderGenres();
+  renderSongs();
+}
+
+async function refreshPublicData() {
+  const data = await api("/api/public");
+  applyPublicData(data);
+  return data;
+}
+
+function showPausedNotice() {
+  closeDialog(els.dialog);
+  openDialog(els.pausedDialog);
+}
+
 async function loadPublic() {
   try {
-    const data = await api("/api/public");
-    renderPublicSettings(data);
-    state.songs = data.songs;
-    state.settings = data.settings || state.settings;
-    state.requestsPaused = Boolean(data.activeGig && data.activeGig.requestsPaused);
-
-    if (data.activeGig) {
-      els.requestHeading.textContent = data.activeGig.name;
-      els.gigVenue.textContent = state.requestsPaused
-        ? "Requests are paused"
-        : data.activeGig.venue || "Requests are open";
-    } else {
-      els.requestHeading.textContent = "Requests are closed";
-      els.gigVenue.textContent = "Check back during the next performance.";
-    }
-
-    renderGenres();
-    renderSongs();
+    await refreshPublicData();
   } catch (error) {
     showToast(error.message);
   }
@@ -217,14 +233,24 @@ els.sortButtons.forEach(button => {
   });
 });
 
-els.songList.addEventListener("click", event => {
+els.songList.addEventListener("click", async event => {
   const button = event.target.closest("[data-song-id]");
   if (!button) return;
-  if (state.requestsPaused) {
-    showToast("Requests are paused right now.");
+
+  try {
+    await refreshPublicData();
+  } catch (error) {
+    showToast(error.message);
     return;
   }
+
+  if (state.requestsPaused) {
+    showPausedNotice();
+    return;
+  }
+
   state.selectedSong = state.songs.find(song => song.id === button.dataset.songId);
+  if (!state.selectedSong) return;
   els.dialogSongTitle.textContent = state.selectedSong.title;
   els.dialogSongArtist.textContent = state.selectedSong.artist;
   els.form.reset();
@@ -251,11 +277,18 @@ els.form.addEventListener("submit", async event => {
     closeDialog(els.dialog);
     showToast(`Request sent: ${state.selectedSong.title}`);
   } catch (error) {
+    if (error.message.toLowerCase().indexOf("paused") !== -1) {
+      state.requestsPaused = true;
+      renderSongs();
+      showPausedNotice();
+      return;
+    }
     showToast(error.message);
   }
 });
 
 els.cancelRequest.addEventListener("click", () => closeDialog(els.dialog));
+els.closePausedDialog.addEventListener("click", () => closeDialog(els.pausedDialog));
 els.searchInput.addEventListener("input", () => {
   if (state.selectedFilter !== "All") {
     state.selectedFilter = "All";

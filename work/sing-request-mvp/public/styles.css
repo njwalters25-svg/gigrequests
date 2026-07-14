@@ -465,6 +465,12 @@ button:disabled {
   padding: 18px;
 }
 
+.status-dialog-content {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+
 .dialog h2 {
   margin: 0;
 }
