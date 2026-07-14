@@ -84,8 +84,13 @@ function songMatches(song) {
   const tags = tagsFor(song);
   const lowerTags = tags.map(tag => tag.toLowerCase());
   const selectedFilter = state.selectedFilter.toLowerCase();
+  const tagMatchesFilter = lowerTags.some(tag =>
+    tag === selectedFilter ||
+    tag.indexOf(selectedFilter) !== -1 ||
+    selectedFilter.indexOf(tag) !== -1
+  );
   const filterMatch = state.selectedFilter === "All" ||
-    (selectedFilter === favouriteFilter.toLowerCase() ? song.featured : lowerTags.indexOf(selectedFilter) !== -1);
+    (selectedFilter === favouriteFilter.toLowerCase() ? song.featured : tagMatchesFilter);
   const textMatch = !query || `${song.title} ${song.artist} ${tags.join(" ")}`.toLowerCase().indexOf(query) !== -1;
   return filterMatch && textMatch;
 }
@@ -193,6 +198,7 @@ els.genreChips.addEventListener("click", event => {
   const button = event.target.closest("[data-filter]");
   if (!button) return;
   state.selectedFilter = button.dataset.filter;
+  els.searchInput.value = "";
   renderGenres();
   renderSongs();
 });
