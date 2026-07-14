@@ -152,7 +152,7 @@ function renderSongs() {
   });
 
   if (!songs.length) {
-    els.songList.innerHTML = `<div class="empty">No songs match that search.</div>`;
+    els.songList.innerHTML = `<div class="empty">No available songs match that search.</div>`;
     return;
   }
 
@@ -236,7 +236,13 @@ els.form.addEventListener("submit", async event => {
 });
 
 els.cancelRequest.addEventListener("click", () => closeDialog(els.dialog));
-els.searchInput.addEventListener("input", renderSongs);
+els.searchInput.addEventListener("input", () => {
+  if (state.selectedFilter !== "All") {
+    state.selectedFilter = "All";
+    renderGenres();
+  }
+  renderSongs();
+});
 els.refreshButton.addEventListener("click", loadPublic);
 
 loadPublic();
