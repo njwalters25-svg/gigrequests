@@ -6,6 +6,7 @@ const state = {
   },
   selectedFilter: "All",
   selectedSong: null,
+  requestsPaused: false,
   sort: "title"
 };
 
@@ -167,7 +168,9 @@ function renderSongs() {
         <h3>${escapeHtml(song.title)}</h3>
         <p>${escapeHtml(song.artist)}</p>
       </div>
-      <button class="primary" type="button" data-song-id="${song.id}">Request</button>
+      <button class="primary" type="button" data-song-id="${song.id}" ${state.requestsPaused ? "disabled" : ""}>
+        ${state.requestsPaused ? "Paused" : "Request"}
+      </button>
     </article>
   `).join("");
 }
@@ -178,10 +181,13 @@ async function loadPublic() {
     renderPublicSettings(data);
     state.songs = data.songs;
     state.settings = data.settings || state.settings;
+    state.requestsPaused = Boolean(data.activeGig && data.activeGig.requestsPaused);
 
     if (data.activeGig) {
       els.requestHeading.textContent = data.activeGig.name;
-      els.gigVenue.textContent = data.activeGig.venue || "Requests are open";
+      els.gigVenue.textContent = state.requestsPaused
+        ? "Requests are paused"
+        : data.activeGig.venue || "Requests are open";
     } else {
       els.requestHeading.textContent = "Requests are closed";
       els.gigVenue.textContent = "Check back during the next performance.";
@@ -214,6 +220,10 @@ els.sortButtons.forEach(button => {
 els.songList.addEventListener("click", event => {
   const button = event.target.closest("[data-song-id]");
   if (!button) return;
+  if (state.requestsPaused) {
+    showToast("Requests are paused right now.");
+    return;
+  }
   state.selectedSong = state.songs.find(song => song.id === button.dataset.songId);
   els.dialogSongTitle.textContent = state.selectedSong.title;
   els.dialogSongArtist.textContent = state.selectedSong.artist;
@@ -224,6 +234,10 @@ els.songList.addEventListener("click", event => {
 els.form.addEventListener("submit", async event => {
   event.preventDefault();
   if (!state.selectedSong) return;
+  if (state.requestsPaused) {
+    showToast("Requests are paused right now.");
+    return;
+  }
 
   try {
     await api("/api/requests", {

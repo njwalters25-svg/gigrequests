@@ -239,7 +239,8 @@
       "notes": "",
       "status": "active",
       "startedAt": "2026-07-09T12:16:32.617Z",
-      "archivedAt": null
+      "archivedAt": null,
+      "requestsPaused": false
     }
   ],
   "requests": [

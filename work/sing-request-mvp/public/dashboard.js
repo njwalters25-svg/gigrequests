@@ -16,6 +16,7 @@ const els = {
   activeGigControlName: document.querySelector("#activeGigControlName"),
   activeGigControlMeta: document.querySelector("#activeGigControlMeta"),
   editActiveGig: document.querySelector("#editActiveGig"),
+  pauseRequests: document.querySelector("#pauseRequests"),
   endActiveGig: document.querySelector("#endActiveGig"),
   stats: document.querySelector("#stats"),
   requestList: document.querySelector("#requestList"),
@@ -451,18 +452,25 @@ function renderDashboard() {
   }
 
   if (activeGig) {
+    const paused = Boolean(activeGig.requestsPaused);
     els.activeGigName.textContent = activeGig.name;
-    els.activeGigMeta.textContent = `${activeGig.venue || "No venue"}${activeGig.scheduledAt ? ` · ${dateTimeLabel(activeGig.scheduledAt)}` : ""} · started ${timeLabel(activeGig.startedAt)}`;
+    els.activeGigMeta.textContent = `${activeGig.venue || "No venue"}${activeGig.scheduledAt ? ` · ${dateTimeLabel(activeGig.scheduledAt)}` : ""} · ${paused ? "requests paused" : "requests open"} · started ${timeLabel(activeGig.startedAt)}`;
     els.activeGigControlName.textContent = activeGig.name;
-    els.activeGigControlMeta.textContent = `${activeGig.venue || "No venue"}${activeGig.scheduledAt ? ` · ${dateTimeLabel(activeGig.scheduledAt)}` : ""} · requests are open`;
+    els.activeGigControlMeta.textContent = `${activeGig.venue || "No venue"}${activeGig.scheduledAt ? ` · ${dateTimeLabel(activeGig.scheduledAt)}` : ""} · ${paused ? "requests are paused" : "requests are open"}`;
+    els.pauseRequests.textContent = paused ? "Reopen requests" : "Pause requests";
+    els.pauseRequests.classList.toggle("active-pause", paused);
     els.editActiveGig.disabled = false;
+    els.pauseRequests.disabled = false;
     els.endActiveGig.disabled = false;
   } else {
     els.activeGigName.textContent = "No active gig";
     els.activeGigMeta.textContent = "Start a new gig to open audience requests.";
     els.activeGigControlName.textContent = "No active gig";
     els.activeGigControlMeta.textContent = "Start a new gig to open audience requests.";
+    els.pauseRequests.textContent = "Pause requests";
+    els.pauseRequests.classList.remove("active-pause");
     els.editActiveGig.disabled = true;
+    els.pauseRequests.disabled = true;
     els.endActiveGig.disabled = true;
   }
 
@@ -891,6 +899,23 @@ els.openGigDialog.addEventListener("click", () => {
 els.editActiveGig.addEventListener("click", () => {
   if (!state.dashboard.activeGig) return;
   openGigForm(state.dashboard.activeGig, "edit");
+});
+
+els.pauseRequests.addEventListener("click", async () => {
+  const gig = state.dashboard.activeGig;
+  if (!gig) return;
+  const nextPaused = !Boolean(gig.requestsPaused);
+
+  try {
+    await api(`/api/gigs/${gig.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ requestsPaused: nextPaused })
+    });
+    showToast(nextPaused ? "Audience requests paused." : "Audience requests reopened.");
+    await loadDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
 });
 
 els.endActiveGig.addEventListener("click", async () => {

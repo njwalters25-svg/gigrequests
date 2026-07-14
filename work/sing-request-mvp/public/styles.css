@@ -371,6 +371,12 @@ button:disabled {
   background: #fdecef;
 }
 
+.active-pause {
+  color: #725118;
+  border-color: #f0c36b;
+  background: #fff4d6;
+}
+
 .archive-request-list {
   display: grid;
   gap: 8px;

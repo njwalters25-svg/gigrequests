@@ -335,6 +335,7 @@ async function handleApi(req, res, url) {
       const song = db.songs.find(item => item.id === body.songId && !item.deletedAt && item.available);
 
       if (!gig) return sendJson(res, 409, { error: "Requests are closed right now." });
+      if (gig.requestsPaused) return sendJson(res, 409, { error: "Requests are paused right now." });
       if (!song) return sendJson(res, 400, { error: "Please choose an available song." });
 
       const newRequest = {
@@ -369,6 +370,7 @@ async function handleApi(req, res, url) {
         scheduledAt: String(body.scheduledAt || "").trim().slice(0, 40),
         notes: String(body.notes || "").trim().slice(0, 240),
         status: "active",
+        requestsPaused: false,
         startedAt: now,
         archivedAt: null
       };
@@ -405,6 +407,7 @@ async function handleApi(req, res, url) {
       if ("venue" in body) gig.venue = String(body.venue || "").trim().slice(0, 80);
       if ("scheduledAt" in body) gig.scheduledAt = String(body.scheduledAt || "").trim().slice(0, 40);
       if ("notes" in body) gig.notes = String(body.notes || "").trim().slice(0, 240);
+      if ("requestsPaused" in body) gig.requestsPaused = Boolean(body.requestsPaused);
 
       return sendJson(res, 200, { gig });
     });
