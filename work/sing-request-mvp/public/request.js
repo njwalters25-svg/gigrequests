@@ -37,7 +37,7 @@ const els = {
 };
 
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
+  return String(value == null ? "" : value).replace(/[&<>"']/g, char => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
@@ -52,11 +52,28 @@ function showToast(message) {
   window.setTimeout(() => els.toast.classList.remove("show"), 2600);
 }
 
+function openDialog(dialog) {
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+    return;
+  }
+
+  dialog.setAttribute("open", "");
+}
+
+function closeDialog(dialog) {
+  if (typeof dialog.close === "function") {
+    dialog.close();
+    return;
+  }
+
+  dialog.removeAttribute("open");
+}
+
 async function api(path, options) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json" },
-    ...options
-  });
+  const fetchOptions = options || {};
+  fetchOptions.headers = Object.assign({ "Content-Type": "application/json" }, fetchOptions.headers || {});
+  const response = await fetch(path, fetchOptions);
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "Something went wrong.");
   return data;
@@ -195,7 +212,7 @@ els.songList.addEventListener("click", event => {
   els.dialogSongTitle.textContent = state.selectedSong.title;
   els.dialogSongArtist.textContent = state.selectedSong.artist;
   els.form.reset();
-  els.dialog.showModal();
+  openDialog(els.dialog);
 });
 
 els.form.addEventListener("submit", async event => {
@@ -211,14 +228,14 @@ els.form.addEventListener("submit", async event => {
         message: els.message.value
       })
     });
-    els.dialog.close();
+    closeDialog(els.dialog);
     showToast(`Request sent: ${state.selectedSong.title}`);
   } catch (error) {
     showToast(error.message);
   }
 });
 
-els.cancelRequest.addEventListener("click", () => els.dialog.close());
+els.cancelRequest.addEventListener("click", () => closeDialog(els.dialog));
 els.searchInput.addEventListener("input", renderSongs);
 els.refreshButton.addEventListener("click", loadPublic);
 

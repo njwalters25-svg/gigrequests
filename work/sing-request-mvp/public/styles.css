@@ -437,6 +437,10 @@ button:disabled {
   box-shadow: var(--shadow);
 }
 
+.dialog:not([open]) {
+  display: none;
+}
+
 .wide-dialog {
   width: min(680px, calc(100% - 28px));
 }
