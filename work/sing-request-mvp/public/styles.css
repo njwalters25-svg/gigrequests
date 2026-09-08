@@ -56,6 +56,12 @@ button:disabled {
   margin-bottom: 22px;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -190,6 +196,36 @@ button:disabled {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: var(--shadow);
+}
+
+.login-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-panel {
+  display: grid;
+  width: min(420px, 100%);
+  gap: 24px;
+  padding: 24px;
+}
+
+.login-panel h1 {
+  margin: 0;
+}
+
+.login-form {
+  display: grid;
+  gap: 14px;
+}
+
+.form-error {
+  min-height: 1.3em;
+  margin: 0;
+  color: var(--rose-dark);
+  font-weight: 700;
 }
 
 .request-panel {

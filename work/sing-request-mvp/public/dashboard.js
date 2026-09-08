@@ -10,6 +10,7 @@ const state = {
 };
 
 const els = {
+  logoutButton: document.querySelector("#logoutButton"),
   dashboardSinger: document.querySelector("#dashboardSinger"),
   activeGigName: document.querySelector("#activeGigName"),
   activeGigMeta: document.querySelector("#activeGigMeta"),
@@ -128,6 +129,10 @@ async function api(path, options) {
   fetchOptions.headers = Object.assign({ "Content-Type": "application/json" }, fetchOptions.headers || {});
   const response = await fetch(path, fetchOptions);
   const data = await response.json();
+  if (response.status === 401) {
+    window.location.href = "/login";
+    throw new Error(data.error || "Please log in to use the dashboard.");
+  }
   if (!response.ok) throw new Error(data.error || "Something went wrong.");
   return data;
 }
@@ -894,6 +899,15 @@ els.editSongForm.addEventListener("submit", async event => {
 
 els.openGigDialog.addEventListener("click", () => {
   openGigForm();
+});
+
+els.logoutButton.addEventListener("click", async () => {
+  try {
+    await api("/api/logout", { method: "POST" });
+  } catch (error) {
+    // Expired sessions are already redirected by api().
+  }
+  window.location.href = "/login";
 });
 
 els.editActiveGig.addEventListener("click", () => {

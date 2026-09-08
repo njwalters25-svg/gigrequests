@@ -10,6 +10,9 @@ const DB_PATH = path.join(ROOT, "data", "db.json");
 const SUPABASE_URL = String(process.env.SUPABASE_URL || "").replace(/\/$/, "");
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || "";
 const APP_STATE_ID = process.env.APP_STATE_ID || "default";
+const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || "";
+const DASHBOARD_SESSION_SECRET = process.env.DASHBOARD_SESSION_SECRET || DASHBOARD_PASSWORD || "local-dashboard-secret";
+const DASHBOARD_COOKIE = "dashboard_session";
 let writeQueue = Promise.resolve();
 
 const contentTypes = {
@@ -33,6 +36,89 @@ const reservedRoutes = new Set([
 
 function useSupabase() {
   return Boolean(SUPABASE_URL && SUPABASE_KEY);
+}
+
+function dashboardAuthEnabled() {
+  return Boolean(DASHBOARD_PASSWORD);
+}
+
+function parseCookies(req) {
+  return String(req.headers.cookie || "")
+    .split(";")
+    .map(cookie => cookie.trim())
+    .filter(Boolean)
+    .reduce((cookies, cookie) => {
+      const separator = cookie.indexOf("=");
+      if (separator === -1) return cookies;
+      cookies[decodeURIComponent(cookie.slice(0, separator))] = decodeURIComponent(cookie.slice(separator + 1));
+      return cookies;
+    }, {});
+}
+
+function signDashboardSession(expiresAt) {
+  return crypto
+    .createHmac("sha256", DASHBOARD_SESSION_SECRET)
+    .update(String(expiresAt))
+    .digest("hex");
+}
+
+function dashboardSessionValue(expiresAt) {
+  return `${expiresAt}.${signDashboardSession(expiresAt)}`;
+}
+
+function safeEqual(left, right) {
+  const leftBuffer = Buffer.from(String(left));
+  const rightBuffer = Buffer.from(String(right));
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function isDashboardAuthenticated(req) {
+  if (!dashboardAuthEnabled()) return true;
+
+  const token = parseCookies(req)[DASHBOARD_COOKIE];
+  if (!token) return false;
+
+  const parts = token.split(".");
+  if (parts.length !== 2) return false;
+
+  const expiresAt = Number(parts[0]);
+  if (!Number.isFinite(expiresAt) || expiresAt < Date.now()) return false;
+
+  return safeEqual(parts[1], signDashboardSession(expiresAt));
+}
+
+function cookieOptions(req, maxAge) {
+  const secure = req.socket.encrypted || req.headers["x-forwarded-proto"] === "https";
+  return [
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${maxAge}`,
+    secure ? "Secure" : ""
+  ].filter(Boolean).join("; ");
+}
+
+function setDashboardCookie(req, res) {
+  const maxAge = 60 * 60 * 24 * 14;
+  const expiresAt = Date.now() + maxAge * 1000;
+  res.setHeader("Set-Cookie", `${DASHBOARD_COOKIE}=${encodeURIComponent(dashboardSessionValue(expiresAt))}; ${cookieOptions(req, maxAge)}`);
+}
+
+function clearDashboardCookie(req, res) {
+  res.setHeader("Set-Cookie", `${DASHBOARD_COOKIE}=; ${cookieOptions(req, 0)}`);
+}
+
+function redirect(res, location) {
+  res.writeHead(302, { Location: location });
+  res.end();
+}
+
+function isProtectedApi(pathname) {
+  return pathname === "/api/dashboard" ||
+    pathname.startsWith("/api/gigs") ||
+    pathname.startsWith("/api/songs") ||
+    pathname === "/api/settings" ||
+    pathname.startsWith("/api/requests/");
 }
 
 async function readLocalDb() {
@@ -285,6 +371,39 @@ function tagCellsToTags(cells) {
 }
 
 async function handleApi(req, res, url) {
+  if (req.method === "GET" && url.pathname === "/api/session") {
+    return sendJson(res, 200, {
+      authenticated: isDashboardAuthenticated(req),
+      passwordRequired: dashboardAuthEnabled()
+    });
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/login") {
+    if (!dashboardAuthEnabled()) {
+      setDashboardCookie(req, res);
+      return sendJson(res, 200, { authenticated: true });
+    }
+
+    const body = await readBody(req);
+    const password = String(body.password || "");
+
+    if (!safeEqual(password, DASHBOARD_PASSWORD)) {
+      return sendJson(res, 401, { error: "Incorrect password." });
+    }
+
+    setDashboardCookie(req, res);
+    return sendJson(res, 200, { authenticated: true });
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/logout") {
+    clearDashboardCookie(req, res);
+    return sendJson(res, 200, { authenticated: false });
+  }
+
+  if (isProtectedApi(url.pathname) && !isDashboardAuthenticated(req)) {
+    return sendJson(res, 401, { error: "Please log in to use the dashboard." });
+  }
+
   if (req.method === "GET" && url.pathname === "/api/public") {
     const db = await readDb();
     const gig = activeGig(db);
@@ -607,7 +726,18 @@ async function handleApi(req, res, url) {
 async function serveStatic(req, res, url) {
   let filePath = url.pathname === "/" ? "/index.html" : url.pathname;
   if (filePath === "/dashboard") filePath = "/dashboard.html";
+  if (filePath === "/login") filePath = "/login.html";
   if (filePath === "/request") filePath = "/index.html";
+
+  if ((filePath === "/dashboard.html" || filePath === "/dashboard") && !isDashboardAuthenticated(req)) {
+    redirect(res, "/login");
+    return;
+  }
+
+  if (filePath === "/login.html" && isDashboardAuthenticated(req)) {
+    redirect(res, "/dashboard");
+    return;
+  }
 
   const slug = url.pathname.slice(1);
   if (
