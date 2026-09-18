@@ -47,6 +47,21 @@
           </div>
 
           <div class="song-list" id="songList"></div>
+
+          <section class="wish-panel" aria-labelledby="wishTitle">
+            <div>
+              <p class="eyebrow">Wish list</p>
+              <h2 id="wishTitle">What songs would you like to see on Chelle's Jukebox?</h2>
+              <p class="muted">Suggest a song for a future set.</p>
+            </div>
+            <form class="wish-form" id="wishForm">
+              <input id="wishTitleInput" maxlength="120" placeholder="Song title" required>
+              <input id="wishArtistInput" maxlength="120" placeholder="Artist, if you know it">
+              <input id="wishNameInput" maxlength="80" placeholder="Your name, optional">
+              <textarea id="wishMessageInput" maxlength="180" placeholder="Message, optional"></textarea>
+              <button class="primary" type="submit">Send suggestion</button>
+            </form>
+          </section>
         </section>
       </section>
     </main>

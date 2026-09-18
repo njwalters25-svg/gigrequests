@@ -25,6 +25,11 @@ const els = {
   searchInput: document.querySelector("#searchInput"),
   genreChips: document.querySelector("#genreChips"),
   songList: document.querySelector("#songList"),
+  wishForm: document.querySelector("#wishForm"),
+  wishTitleInput: document.querySelector("#wishTitleInput"),
+  wishArtistInput: document.querySelector("#wishArtistInput"),
+  wishNameInput: document.querySelector("#wishNameInput"),
+  wishMessageInput: document.querySelector("#wishMessageInput"),
   sortButtons: document.querySelectorAll("[data-sort]"),
   refreshButton: document.querySelector("#refreshButton"),
   dialog: document.querySelector("#requestDialog"),
@@ -297,5 +302,25 @@ els.searchInput.addEventListener("input", () => {
   renderSongs();
 });
 els.refreshButton.addEventListener("click", loadPublic);
+
+els.wishForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  try {
+    await api("/api/song-wishes", {
+      method: "POST",
+      body: JSON.stringify({
+        title: els.wishTitleInput.value,
+        artist: els.wishArtistInput.value,
+        guestName: els.wishNameInput.value,
+        message: els.wishMessageInput.value
+      })
+    });
+    els.wishForm.reset();
+    showToast("Song suggestion sent.");
+  } catch (error) {
+    showToast(error.message);
+  }
+});
 
 loadPublic();

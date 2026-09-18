@@ -21,6 +21,7 @@ const els = {
   endActiveGig: document.querySelector("#endActiveGig"),
   stats: document.querySelector("#stats"),
   requestList: document.querySelector("#requestList"),
+  songWishList: document.querySelector("#songWishList"),
   publicSettingsForm: document.querySelector("#publicSettingsForm"),
   publicStageName: document.querySelector("#publicStageName"),
   publicTagline: document.querySelector("#publicTagline"),
@@ -388,6 +389,34 @@ function renderArchive() {
   `).join("");
 }
 
+function renderSongWishes() {
+  const wishes = Array.isArray(state.dashboard.songWishes)
+    ? state.dashboard.songWishes
+    : [];
+
+  if (!wishes.length) {
+    els.songWishList.innerHTML = `<div class="empty">Audience song suggestions will appear here.</div>`;
+    return;
+  }
+
+  els.songWishList.innerHTML = wishes.map(wish => `
+    <article class="wish-card">
+      <div>
+        <strong>${escapeHtml(wish.title)}</strong>
+        <p>${escapeHtml(wish.artist || "Artist not supplied")}</p>
+        <p class="muted">${wish.guestName ? escapeHtml(wish.guestName) : "Anonymous"}${wish.message ? ` · ${escapeHtml(wish.message)}` : ""}</p>
+        <p class="muted">Suggested ${dateTimeLabel(wish.createdAt)}</p>
+      </div>
+      <div class="wish-actions">
+        <button class="mini-button" type="button" data-add-wish-id="${wish.id}" ${wish.status === "added" ? "disabled" : ""}>
+          ${wish.status === "added" ? "Added" : "Add to catalog"}
+        </button>
+        <button class="mini-button danger-button" type="button" data-delete-wish-id="${wish.id}">Delete</button>
+      </div>
+    </article>
+  `).join("");
+}
+
 function renderArchiveDialog(gig) {
   state.archiveGig = gig;
   els.archiveDialogTitle.textContent = gig.name;
@@ -480,6 +509,7 @@ function renderDashboard() {
   }
 
   renderRequests();
+  renderSongWishes();
   state.selectedSongIds = new Set(Array.from(state.selectedSongIds).filter(id =>
     state.dashboard.songs.some(song => song.id === id)
   ));
@@ -509,6 +539,29 @@ els.requestList.addEventListener("click", async event => {
       body: JSON.stringify({ status: button.dataset.status })
     })));
     await loadDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+});
+
+els.songWishList.addEventListener("click", async event => {
+  const addButton = event.target.closest("[data-add-wish-id]");
+  const deleteButton = event.target.closest("[data-delete-wish-id]");
+
+  try {
+    if (addButton) {
+      const result = await api(`/api/song-wishes/${addButton.dataset.addWishId}/add`, { method: "POST" });
+      showToast(result.duplicate ? "That song is already in the catalog." : "Suggestion added to catalog.");
+      await loadDashboard();
+      return;
+    }
+
+    if (deleteButton) {
+      if (!window.confirm("Delete this song suggestion?")) return;
+      await api(`/api/song-wishes/${deleteButton.dataset.deleteWishId}`, { method: "DELETE" });
+      showToast("Song suggestion deleted.");
+      await loadDashboard();
+    }
   } catch (error) {
     showToast(error.message);
   }

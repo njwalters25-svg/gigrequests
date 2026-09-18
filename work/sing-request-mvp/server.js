@@ -304,6 +304,18 @@ function gigView(db, gig) {
   };
 }
 
+function ensureSongWishes(db) {
+  if (!Array.isArray(db.songWishes)) db.songWishes = [];
+  return db.songWishes;
+}
+
+function songWishView(wish) {
+  return {
+    ...wish,
+    status: wish.status || "new"
+  };
+}
+
 function createSong(body) {
   const title = cleanText(body.title, 120);
   const artist = cleanText(body.artist, 120);
@@ -404,6 +416,13 @@ async function handleApi(req, res, url) {
     return sendJson(res, 401, { error: "Please log in to use the dashboard." });
   }
 
+  if (
+    url.pathname.startsWith("/api/song-wishes/") &&
+    !isDashboardAuthenticated(req)
+  ) {
+    return sendJson(res, 401, { error: "Please log in to use the dashboard." });
+  }
+
   if (req.method === "GET" && url.pathname === "/api/public") {
     const db = await readDb();
     const gig = activeGig(db);
@@ -427,6 +446,10 @@ async function handleApi(req, res, url) {
       activeGig: gig,
       settings: settingsView(db),
       songs: db.songs.filter(song => !song.deletedAt).map(songView),
+      songWishes: ensureSongWishes(db)
+        .filter(wish => !wish.deletedAt)
+        .map(songWishView)
+        .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))),
       requests: gigRequests,
       archivedGigs: db.gigs
         .filter(item => item.status === "archived")
@@ -469,6 +492,33 @@ async function handleApi(req, res, url) {
 
       db.requests.push(newRequest);
       return sendJson(res, 201, { request: requestView(db, newRequest) });
+    });
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/song-wishes") {
+    const body = await readBody(req);
+    return mutateDb(db => {
+      const title = cleanText(body.title, 120);
+      const artist = cleanText(body.artist, 120);
+      const guestName = cleanText(body.guestName, 80);
+      const message = cleanText(body.message, 180);
+
+      if (!title) return sendJson(res, 400, { error: "Please enter a song title." });
+
+      const wish = {
+        id: `wish_${crypto.randomUUID()}`,
+        title,
+        artist,
+        guestName,
+        message,
+        status: "new",
+        createdAt: new Date().toISOString(),
+        addedAt: null,
+        deletedAt: null
+      };
+
+      ensureSongWishes(db).push(wish);
+      return sendJson(res, 201, { wish: songWishView(wish) });
     });
   }
 
@@ -557,6 +607,42 @@ async function handleApi(req, res, url) {
 
       db.songs.push(result.song);
       return sendJson(res, 201, { song: songView(result.song) });
+    });
+  }
+
+  if (req.method === "POST" && url.pathname.match(/^\/api\/song-wishes\/[^/]+\/add$/)) {
+    const id = url.pathname.split("/")[3];
+    return mutateDb(db => {
+      const wish = ensureSongWishes(db).find(item => item.id === id && !item.deletedAt);
+
+      if (!wish) return sendJson(res, 404, { error: "Song wish not found." });
+
+      const duplicate = db.songs.some(song =>
+        !song.deletedAt &&
+        song.title.toLowerCase() === wish.title.toLowerCase() &&
+        song.artist.toLowerCase() === wish.artist.toLowerCase()
+      );
+
+      if (duplicate) {
+        wish.status = "added";
+        wish.addedAt = new Date().toISOString();
+        return sendJson(res, 200, { wish: songWishView(wish), duplicate: true });
+      }
+
+      const result = createSong({
+        title: wish.title,
+        artist: wish.artist || "Unknown artist",
+        tags: ["Audience wish"],
+        available: false,
+        featured: false
+      });
+
+      if (result.error) return sendJson(res, 400, { error: result.error });
+
+      db.songs.push(result.song);
+      wish.status = "added";
+      wish.addedAt = new Date().toISOString();
+      return sendJson(res, 201, { wish: songWishView(wish), song: songView(result.song) });
     });
   }
 
@@ -680,6 +766,18 @@ async function handleApi(req, res, url) {
       song.available = false;
       song.featured = false;
       return sendJson(res, 200, { deleted: true, songId: id });
+    });
+  }
+
+  if (req.method === "DELETE" && url.pathname.startsWith("/api/song-wishes/")) {
+    const id = url.pathname.split("/").pop();
+    return mutateDb(db => {
+      const wish = ensureSongWishes(db).find(item => item.id === id && !item.deletedAt);
+
+      if (!wish) return sendJson(res, 404, { error: "Song wish not found." });
+
+      wish.deletedAt = new Date().toISOString();
+      return sendJson(res, 200, { deleted: true, wishId: id });
     });
   }
 

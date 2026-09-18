@@ -367,20 +367,58 @@ button:disabled {
 
 .song-list,
 .request-list,
-.archive-list {
+.archive-list,
+.wish-list {
   display: grid;
   gap: 10px;
 }
 
 .song-card,
 .request-card,
-.archive-card {
+.archive-card,
+.wish-card {
   display: grid;
   gap: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px;
   background: #fff;
+}
+
+.wish-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+
+.wish-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.wish-form textarea,
+.wish-form button {
+  grid-column: 1 / -1;
+}
+
+.wish-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.wish-card p {
+  margin: 3px 0 0;
+  color: var(--muted);
+}
+
+.wish-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
 .archive-card {
@@ -521,6 +559,8 @@ label {
 label input,
 label textarea,
 .song-add-form input,
+.wish-form input,
+.wish-form textarea,
 .dialog input[type="text"],
 .dialog input:not([type]) {
   width: 100%;
@@ -1001,6 +1041,15 @@ textarea {
 
   .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wish-form,
+  .wish-card {
+    grid-template-columns: 1fr;
+  }
+
+  .wish-actions {
+    justify-content: flex-start;
   }
 }
 
