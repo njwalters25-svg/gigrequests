@@ -545,6 +545,24 @@ button:disabled {
   padding: 20px;
 }
 
+.dialog-wish {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #f9fafb;
+}
+
+.dialog-wish summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.dialog-wish-fields {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .dialog h2 {
   margin: 0;
 }
@@ -561,6 +579,8 @@ label textarea,
 .song-add-form input,
 .wish-form input,
 .wish-form textarea,
+.dialog-wish input,
+.dialog-wish textarea,
 .dialog input[type="text"],
 .dialog input:not([type]) {
   width: 100%;

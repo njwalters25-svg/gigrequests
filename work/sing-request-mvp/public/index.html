@@ -81,6 +81,15 @@
           Message or table number
           <textarea id="message" maxlength="180" placeholder="Optional"></textarea>
         </label>
+        <details class="dialog-wish">
+          <summary>Suggest a song for the wish list</summary>
+          <div class="dialog-wish-fields">
+            <input id="dialogWishTitle" maxlength="120" placeholder="Song title">
+            <input id="dialogWishArtist" maxlength="120" placeholder="Artist, if you know it">
+            <textarea id="dialogWishMessage" maxlength="180" placeholder="Message, optional"></textarea>
+            <button class="mini-button" type="button" id="sendDialogWish">Send suggestion</button>
+          </div>
+        </details>
         <div class="request-actions">
           <button class="primary" type="submit">Send request</button>
           <button class="ghost" value="cancel" type="button" id="cancelRequest">Cancel</button>

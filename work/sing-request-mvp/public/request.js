@@ -39,6 +39,10 @@ const els = {
   dialogSongArtist: document.querySelector("#dialogSongArtist"),
   guestName: document.querySelector("#guestName"),
   message: document.querySelector("#message"),
+  dialogWishTitle: document.querySelector("#dialogWishTitle"),
+  dialogWishArtist: document.querySelector("#dialogWishArtist"),
+  dialogWishMessage: document.querySelector("#dialogWishMessage"),
+  sendDialogWish: document.querySelector("#sendDialogWish"),
   cancelRequest: document.querySelector("#cancelRequest"),
   closePausedDialog: document.querySelector("#closePausedDialog"),
   toast: document.querySelector("#toast")
@@ -221,6 +225,13 @@ async function loadPublic() {
   }
 }
 
+async function sendSongWish(values) {
+  await api("/api/song-wishes", {
+    method: "POST",
+    body: JSON.stringify(values)
+  });
+}
+
 els.genreChips.addEventListener("click", event => {
   const button = event.target.closest("[data-filter]");
   if (!button) return;
@@ -307,20 +318,42 @@ els.wishForm.addEventListener("submit", async event => {
   event.preventDefault();
 
   try {
-    await api("/api/song-wishes", {
-      method: "POST",
-      body: JSON.stringify({
-        title: els.wishTitleInput.value,
-        artist: els.wishArtistInput.value,
-        guestName: els.wishNameInput.value,
-        message: els.wishMessageInput.value
-      })
+    await sendSongWish({
+      title: els.wishTitleInput.value,
+      artist: els.wishArtistInput.value,
+      guestName: els.wishNameInput.value,
+      message: els.wishMessageInput.value
     });
     els.wishForm.reset();
     showToast("Song suggestion sent.");
   } catch (error) {
     showToast(error.message);
   }
+});
+
+els.sendDialogWish.addEventListener("click", async () => {
+  try {
+    await sendSongWish({
+      title: els.dialogWishTitle.value,
+      artist: els.dialogWishArtist.value,
+      guestName: els.guestName.value,
+      message: els.dialogWishMessage.value
+    });
+    els.dialogWishTitle.value = "";
+    els.dialogWishArtist.value = "";
+    els.dialogWishMessage.value = "";
+    showToast("Song suggestion sent.");
+  } catch (error) {
+    showToast(error.message);
+  }
+});
+
+[els.dialogWishTitle, els.dialogWishArtist].forEach(input => {
+  input.addEventListener("keydown", event => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    els.sendDialogWish.click();
+  });
 });
 
 loadPublic();
